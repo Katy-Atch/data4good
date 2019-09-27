@@ -1,0 +1,3 @@
+#!/bin/bash
+python manage.py runserver 0.0.0.0:8000
+# screen -S apache2 -dm apachectl -D FOREGROUND

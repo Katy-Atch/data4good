@@ -3,34 +3,15 @@ version: '3'
 services:
   db:
     image: postgres
+
   web:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/code
+    depends_on:
+      - db
+    build: ./web
     ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
+      - 8000:8000
+    volumes:
+      - ./web:/code
+
   cronjobs:
-    build: .
-    command: cron -f
-  redis:
-    image: "redis:alpine"
-  celery:
-    build: .
-    command: celery -A data4good worker -l info
-    volumes:
-      - .:/code
-    depends_on:
-      - db
-      - redis
-  celery-beat:
-    build: .
-    command: celery -A data4good beat -l info
-    volumes:
-      - .:/code
-    depends_on:
-      - db
-      - redis
+    build: ./cronjobs

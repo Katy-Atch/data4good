@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load leaflet_tags %}
+
+{% block links %}
+{% leaflet_js %}
+{% leaflet_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+<style type="text/css">
+  #main {
+    width: 100%;
+    height: 600px;
+  }
+</style>
+{% endblock %}
+
+% block content %}
+<h3>Texas Hunger Initiative CE Locations</h3>
+<h6>Click on a location to view more details regarding finding and/or contacting that particular contracting entity.</h6>
+
+<div id="mapContainer">
+  {% leaflet_map "main" callback="window.map_init" %}
+</div>
+
+<script type="text/javascript">
+    function map_init(map,options){
+  
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets',
+        accessToken: 'pk.eyJ1Ijoia2F0eWF0Y2giLCJhIjoiY2pzbzJiMHFuMGk4YjQ5cnJ4a2NqajdkMSJ9.BklRaDWgtluGgXiAb6YsmA'
+     }).addTo(map);
+  
+      var myRenderer = L.canvas({ padding: 0.25 });
+  
+      {% for site in site_list %}
+  
+      {% if site.longitude != null and site.latitude != null %}
+  
+      
+      var lon = "{{ site.longitude }}";
+      var lat = "{{ site.latitude }}";
+      var siteMarker = L.circleMarker([lat, lon], {
+        renderer: myRenderer,
+        radius: 3.0,
+        fillOpacity: 1.0,
+        color: '#820000'
+      }).addTo(map).bindPopup("<a href={% url 'details' site.id %}>{{ site.name|title }}</a>")
+      .on('mouseover', function(e){
+        this.openPopup();
+      })
+      .on('click', function(e){
+        this.openPopup();
+      })
+      .on('dblclick', function(e){
+        window.open('{% url "details" site.id %}')
+      })
+      {% endif %}
+      {% endfor %}
+    }
+  </script> 
