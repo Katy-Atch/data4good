@@ -20,14 +20,14 @@
 <div id="mapContainer">
   {% leaflet_map "main" callback="window.map_init" %}
 </div>
-<div>
+<!-- <div>
   <h5>Not pictured</h5>
   {% for site in site_list %}
   {% if site.longitude == null or site.latitude == null %}
   <a class="d-block" href="{% url 'details' site.id %}">{{ site.name|title}} {{site.street_city|title}}, TX</a>
   {% endif %}
   {% endfor %}
-</div>
+</div> -->
 
 <script type="text/javascript">
   function map_init(map,options){
@@ -45,10 +45,7 @@
 
     {% if site.longitude != null and site.latitude != null %}
 
-    
-    var lon = "{{ site.longitude }}";
-    var lat = "{{ site.latitude }}";
-    var siteMarker = L.circleMarker([lat, lon], {
+    var siteMarker = L.circleMarker(["{{ site.latitude }}", "{{ site.longitude }}"], {
       renderer: myRenderer,
       radius: 3.0,
       fillOpacity: 1.0,

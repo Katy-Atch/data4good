@@ -52,15 +52,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CRON_CLASSES = [
-#     "pages.cron.DatabaseUpdateJob",
-#     "pages.cron.TestJob",
-# ]
-
-# CRONJOBS = [
-#     ('*/1 * * * *', 'pages.cron.test_job')
-# ]
-
 ROOT_URLCONF = 'data4good.urls'
 
 TEMPLATES = [

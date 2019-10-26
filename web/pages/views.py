@@ -7,7 +7,8 @@ from django.core.management import call_command
 
 # Create your views here.
 def map(request):
-    site_list = list(Site.objects.all())
+    # Needs to be site list OR sponsor list,
+    site_list = list(Site.objects.all().values(''))
     return render(request, "map.html", {'site_list': site_list})
 
 def sponsor(request):
