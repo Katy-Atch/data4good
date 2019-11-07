@@ -56,6 +56,7 @@ def Populate():
         call_command('migrate')
 
     for identifier in sso_portals:
+        print(identifier)
         response = requests.get('https://data.texas.gov/resource/' + identifier + '.json?$limit=' + str(MAX_RECORDS),
             headers=headers)
 
@@ -67,6 +68,8 @@ def Populate():
                 # Default is most_current_record = True
                 # last_updated is set to now by default
                 program_year = get_if_available('programyear', data[x]),
+                # TODO: Check if ce_id is already in database. If so, check if the postal
+                # info has changed. If so, update it and re-geocode. If not, move on
                 ce_id = get_if_available('ceid', data[x]),
                 name = get_if_available('cename', data[x]),
                 county = get_if_available('cecounty', data[x]),
