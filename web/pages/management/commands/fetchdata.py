@@ -1,254 +1,141 @@
 import requests
+import enum
+import sys
 from django.core.management.base import BaseCommand
-from pages.models import Site, CE
-from django.db import connection
-from django.core.management import call_command
+from web.pages.management.commands.mapping import *
+from web.pages.models import Site, CE
+sys.path.append("/data4good/web/pages/")
 
-def db_table_exists(table_name):
-    return table_name in connection.introspection.table_names()
 
-def get_if_available(key, dict):
-    if key in dict:
-        return dict[key]
+class Program(enum.Enum):
+    SFSP = 1
+    SSO = 2
+
+
+class Entity(enum.Enum):
+    CE = 1
+    Site = 2
+
+
+def get_if_available(key, row):
+    if key in row:
+        return row[key]
     else:
         return None
 
-def get_lat(key, dict):
-    if key in dict:
-        return dict[key]['coordinates'][1]
+
+def get_lat(key, row):
+    if key in row:
+        return row[key]['coordinates'][1]
     else:
         return None
 
-def get_long(key, dict):
-    if key in dict:
-        return dict[key]['coordinates'][0]
+
+def get_long(key, row):
+    if key in row:
+        return row[key]['coordinates'][0]
     else:
         return None
 
-def Populate():
-    APP_TOKEN = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
 
-    headers = {'X-App-Token': APP_TOKEN}
+def create_entity(program, entity, row):
+    attribute_list = get_attribute_list(program, entity)
+    new_object = None
 
-    # LOOP
-    # read data from API
-    # parse json data into model instance
-    # save model instance
-    # END LOOP
+    if entity == Entity.CE:
+        new_object = CE()
+    elif entity == Entity.Site:
+        new_object = Site()
 
-    MAX_RECORDS = 50000
+    for portal_attr, db_attr in attribute_list.items():
+        setattr(new_object, db_attr, get_if_available(portal_attr, row))
 
-    # 2019 -> 2018 -> 2017 -> 2016
-    # sso_portals = ["3hpz-ajxk", "93u6-myq9", "sjdu-n9ry", "y3zg-2gdi"]
-    # sfsp_portals = ["rmea-7b2m", "myag-hymh", "wui5-2b5", "cbxb-6zrb"]
-    sso_portals = ["3hpz-ajxk"]
-    sfsp_portals = ["rmea-7b2m"]
-
-    # Clear out anything in the database
-    if db_table_exists('pages_ce') :
-        CE.objects.all().delete()
-    else :
-        call_command('migrate')
-    if db_table_exists('pages_site') :
-        Site.objects.all().delete()
-    else :
-        call_command('migrate')
-
-    for identifier in sso_portals:
-        response = requests.get('https://data.texas.gov/resource/' + identifier + '.json?$limit=' + str(MAX_RECORDS),
-            headers=headers)
-
-        data = response.json()
-
-        for x in range(len(data)):
-            sponsor = CE(
-                # TODO: Need to go through all other records and set most_current_record to false
-                # Default is most_current_record = True
-                # last_updated is set to now by default
-                program_year = get_if_available('programyear', data[x]),
-                ce_id = get_if_available('ceid', data[x]),
-                name = get_if_available('cename', data[x]),
-                county = get_if_available('cecounty', data[x]),
-                type_of_agency = get_if_available('typeofagency', data[x]),
-                county_district_code = get_if_available('countydistrictcode', data[x]),
-                esc = get_if_available('esc', data[x]),
-                tda_region = get_if_available('tdaregion', data[x]),
-                street_address1 = get_if_available('cestreetaddressline1', data[x]),
-                street_address2 = get_if_available('cestreetaddressline2', data[x]),
-                street_city = get_if_available('cestreetaddresscity', data[x]),
-                street_state = get_if_available('cestreetaddressstate', data[x]),
-                street_zip = get_if_available('cestreetaddresszipcode', data[x]),
-
-                mailing_address1 = get_if_available('cemailingaddressline1', data[x]),
-                mailing_address2 = get_if_available('cemailingaddressline2', data[x]),
-                mailing_city = get_if_available('cemailingaddresscity', data[x]),
-                mailing_state = get_if_available('cemailingaddressstate', data[x]),
-                mailing_zip = get_if_available('cemailingaddresszipcode', data[x]),
-
-                superintendent_salutation = get_if_available('superintendentsalutation', data[x]),
-                superintendent_first_name = get_if_available('superintendentfirstname', data[x]),
-                superintendent_last_name = get_if_available('superintendentlastname', data[x]),
-                superintendent_title_position = get_if_available('superintendenttitleposition', data[x]),
-                superintendent_email = get_if_available('superintendentemail', data[x]),
-                superintendent_phone = get_if_available('superintendentphone', data[x]),
-
-                childnutdir_salutation = get_if_available('childnutdirsalutation', data[x]),
-                childnutdir_first_name = get_if_available('childnutdirfirstname', data[x]),
-                childnutdir_last_name = get_if_available('childnutdirlastname', data[x]),
-                childnutdir_title_position = get_if_available('childnutdirtitleposition', data[x]),
-                childnutdir_email = get_if_available('childnutdiremail', data[x]),
-                childnutdir_phone = get_if_available('childnutdirphone', data[x]),
-
-                # Can't get this from API
-                # latitude = data[x][''],
-                # longitude = data[x][''],
-            )
-            sponsor.save()
-
-            site = Site(
-                # TODO: Need to go through all other records and set most_current_record to false
-                # Default is most_current_record = True
-                # last_updated is set to now by default
-                program_year = get_if_available('programyear', data[x]),
-                sso_or_sfsp = Site.SSO,
-                site_id = get_if_available('siteid', data[x]),
-                ce_id = get_if_available('ceid', data[x]),
-                type_of_snp_org = get_if_available('typeofsnporg', data[x]),
-                name = get_if_available('sitename', data[x]),
-                county = get_if_available('sitecounty', data[x]),
-                sso_site_type = get_if_available('sitetype', data[x]),
-                street_address1 = get_if_available('sitestreetaddressline1', data[x]),
-                street_address2 = get_if_available('sitestreetaddressline2', data[x]),
-                street_city = get_if_available('sitestreetcity', data[x]),
-                street_state = get_if_available('sitestreetstate', data[x]),
-                street_zip = get_if_available('sitestreetzipcode', data[x]),
-
-                program_contact_salutation = get_if_available('seamlesssummercontactsal', data[x]),
-                program_contact_first_name = get_if_available('seamlesssummercontactfirstname', data[x]),
-                program_contact_last_name = get_if_available('seamlesssummercontactlastname', data[x]),
-                program_contact_title_position = get_if_available('seamlesssummercontacttit', data[x]),
-                program_contact_email = get_if_available('seamlesssummercontactemail', data[x]),
-                program_contact_phone = get_if_available('seamlesssummercontactphone', data[x]),
-
-                start_date = get_if_available('sitestartdate', data[x]),
-                end_date = get_if_available('siteenddate', data[x]),
-                days_of_operation = get_if_available('days_of_operation', data[x]),
-                meal_types_served = get_if_available('meal_types_served', data[x]),
-
-                latitude = get_lat('geocoded_column', data[x]),
-                longitude = get_long('geocoded_column', data[x]),
-
-            )
-            site.save()
+    new_object.save()
 
 
+# Gets the mapping of portal name : database name for an entity based
+# on what type of entity (Site, CE) and the program (SSO, SFSP)
+def get_attribute_list(program, entity):
+    if program == Program.SSO:
+        if entity == Entity.CE:
+            return {**ce_mapping, **sso_ce_mapping}
+        elif entity == Entity.Site:
+            return {**site_mapping, **sso_site_mapping}
+    elif program == Program.SFSP:
+        if entity == Entity.CE:
+            return ce_mapping
+        elif entity == Entity.Site:
+            return {**site_mapping, **sfsp_site_mapping}
 
-    for identifier in sfsp_portals:
-        response = requests.get('https://data.texas.gov/resource/' + identifier + '.json?$limit=' + str(MAX_RECORDS),
-            headers=headers)
 
-        data = response.json()
+# Checks if an old entity and new entity have the same values for all attributes
+def check_attributes(attribute_list, new_entity, old_entity):
+    for attribute in attribute_list:
+        if get_if_available(attribute, new_entity) != get_if_available(attribute, old_entity):
+            return False
+    return True
 
-        for x in range(len(data)):
-            sponsor = CE(
-                # TODO: Need to go through all other records and set most_current_record to false
-                # Default is most_current_record = True
-                # last_updated is set to now by default
-                program_year = get_if_available('programyear', data[x]),
-                ce_id = get_if_available('ceid', data[x]),
-                name = get_if_available('cename', data[x]),
-                county = get_if_available('cecounty', data[x]),
-                type_of_agency = get_if_available('typeofagency', data[x]),
-                county_district_code = get_if_available('countydistrictcode', data[x]),
-                esc = get_if_available('esc', data[x]),
-                tda_region = get_if_available('tdaregion', data[x]),
-                street_address1 = get_if_available('cestreetaddressline1', data[x]),
-                street_address2 = get_if_available('cestreetaddressline2', data[x]),
-                street_city = get_if_available('cestreetaddresscity', data[x]),
-                street_state = get_if_available('cestreetaddressstate', data[x]),
-                street_zip = get_if_available('cestreetaddresszipcode', data[x]),
 
-                mailing_address1 = get_if_available('cemailingaddressline1', data[x]),
-                mailing_address2 = get_if_available('cemailingaddressline2', data[x]),
-                mailing_city = get_if_available('cemailingaddresscity', data[x]),
-                mailing_state = get_if_available('cemailingaddressstate', data[x]),
-                mailing_zip = get_if_available('cemailingaddresszipcode', data[x]),
-                # Can't get this from API
-                # latitude = data[x][''],
-                # longitude = data[x][''],
-            )
-            sponsor.save()
+# Need to add another condition for if there are more than one entities- error
+# Need to only check a CE in the portal one time
+def parse_json(json_data, program):
+    for x in range(len(json_data)):
+        new_ce_id = get_if_available('ceid', json_data[x])
+        if new_ce_id is not None:
+            existing_ce = CE.objects.filter(ce_id=new_ce_id, most_current_record=True)
+            if len(existing_ce) == 1:
+                # Check that all attributes match
+                if not check_attributes(get_attribute_list(program, Entity.CE), json_data[x], existing_ce):
+                    # Set most_current_record=False on old object
+                    existing_ce.most_current_record = False
+                    existing_ce.save()
+                    create_entity(program, Entity.CE, json_data[x])
+            else:
+                # Not in database- create new object with most_current_record=True
+                create_entity(program, Entity.CE, json_data[x])
 
-            site = Site(
-                # TODO: Need to go through all other records and set most_current_record to false
-                # Default is most_current_record = True
-                # last_updated is set to now by default
-                program_year = get_if_available('programyear', data[x]),
-                sso_or_sfsp = Site.SFSP,
-                site_id = get_if_available('siteid', data[x]), #
-                ce_id = get_if_available('ceid', data[x]),
-                type_of_sfsp_org = get_if_available('typeofsfsporg', data[x]),
-                name = get_if_available('sitename', data[x]),
-                county = get_if_available('sitecounty', data[x]),
-                rural_or_urban_code = get_if_available('ruralorurbancode', data[x]), 
-                sfsp_site_type = get_if_available('sitetype', data[x]),
-                street_address1 = get_if_available('sitestreetaddressline1', data[x]),
-                street_address2 = get_if_available('sitestreetaddressline2', data[x]),
-                street_city = get_if_available('sitestreetaddresscity', data[x]),
-                street_state = get_if_available('sitestreetaddressstate', data[x]),
-                street_zip = get_if_available('sitestreetaddresszipcode', data[x]),
+        new_site_id = get_if_available('siteid', json_data[x])
+        if new_site_id is not None:
+            existing_site = Site.objects.filter(ce_id=new_ce_id, site_id=new_site_id, most_current_record=True)
+            if len(existing_site) == 1:
+                # Need better function for comparing names and addresses so that the strings are stripped of whitespace
+                # and punctuation
+                if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], existing_site):
+                    if not (existing_site.name == get_if_available('name', json_data[x]) or
+                            existing_site.street_address1 == get_if_available('sitestreetaddressline1', json_data[x])):
+                        # Different site- create new object, set most_current_object of old object to False
+                        existing_site.most_current_record = False
+                        existing_site.save()
+                        create_entity(program, Entity.Site, json_data[x])
+            else:
+                create_entity(program, Entity.Site, json_data[x])
 
-                mailing_address1 =  get_if_available('sitemailingaddressline1', data[x]),
-                mailing_address2 =  get_if_available('sitemailingaddressline2', data[x]),
-                mailing_city =  get_if_available('sitemailingaddresscity', data[x]),
-                mailing_state =  get_if_available('sitemailingaddressstate', data[x]),
-                mailing_zip =  get_if_available('sitemailingaddresszipcode', data[x]),
 
-                program_contact_salutation = get_if_available('sfspcontactsalutation', data[x]),
-                program_contact_first_name = get_if_available('sfspcontactfirstname', data[x]),
-                program_contact_last_name = get_if_available('sfspcontactlastname', data[x]),
-                program_contact_title_position = get_if_available('sfspcontacttitleposition', data[x]),
-                program_contact_email = get_if_available('sfspcontactemail', data[x]),
-                program_contact_phone = get_if_available('sfspcontactphone', data[x]),
+def populate():
+    app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
+    headers = {'X-App-Token': app_token}
+    max_records = 50000
+    sso_portal = "3hpz-ajxk"
+    sfsp_portal = "rmea-7b2m"
 
-                site_supervisor_salutation =  get_if_available('sitesupervisorsalutation', data[x]),
-                site_supervisor_first_name =  get_if_available('sitesupervisorfirstname', data[x]),
-                site_supervisor_last_name =  get_if_available('sitesupervisorlastname', data[x]),
-                site_supervisor_title_position =  get_if_available('sitesupervisortitleposition', data[x]),
-                site_supervisor_email =  get_if_available('sitesupervisoremail', data[x]),
-                site_supervisor_phone =  get_if_available('sitesupervisorphone', data[x]),
+    # GET SSO DATA
+    response = requests.get('https://data.texas.gov/resource/' + sso_portal + '.json?$limit=' + str(max_records),
+                            headers=headers)
+    sso_data = response.json()
+    parse_json(sso_data, Program.SSO)
 
-                start_date = get_if_available('sitestartdate', data[x]),
-                end_date = get_if_available('siteenddate', data[x]),
-                days_of_operation = get_if_available('daysofoperation', data[x]),
-                meal_types_served = get_if_available('mealtypesserved', data[x]),
-                
-                latitude = get_lat('geocoded_column', data[x]),
-                longitude = get_long('geocoded_column', data[x]),
-
-                primary_auth_rep_salutation = get_if_available('primaryauthorizedreprese', data[x]),
-                primary_auth_rep_first_name = get_if_available('primaryauthorizedreprese_1', data[x]),
-                primary_auth_rep_last_name = get_if_available('primaryauthorizedreprese_2', data[x]),
-                primary_auth_rep_title_position = get_if_available('primaryauthorizedreprese_3', data[x]),
-                primary_auth_rep_email = get_if_available('primaryauthorizedreprese_4', data[x]),
-                primary_auth_rep_phone = get_if_available('primaryauthorizedreprese_5', data[x]),
-            )
-            if site.latitude == null or site.longitude == null:
-                BingMapsApiKey = "Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c"
-                locationQuery = site.street_address1 + site.streetAddress2
-                geoResponse = requests.get('http://dev.virtualearth.net/REST/v1/Locations?query=' + locationQuery + '&key=' + BingMapsApiKey)
-                geoData = geoResponse.json()
-                
-            site.save()
+    # GET SFSP DATA
+    response = requests.get('https://data.texas.gov/resource/' + sfsp_portal + '.json?$limit=' + str(max_records),
+                            headers=headers)
+    sfsp_data = response.json()
+    parse_json(sfsp_data, Program.SFSP)
 
     return None
+
 
 class Command(BaseCommand):
     help = "Populates the database"
 
     def handle(self, *args, **options):
-        Populate()
-
-
-
+        populate()
 
