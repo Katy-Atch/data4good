@@ -2,9 +2,9 @@ import requests
 import enum
 import sys
 from django.core.management.base import BaseCommand
-from web.pages.management.commands.mapping import *
-from web.pages.models import Site, CE
-sys.path.append("/data4good/web/pages/")
+sys.path.append("/code/pages/management/commands")
+from mapping import *
+from pages.models import Site, CE
 
 
 class Program(enum.Enum):
@@ -138,4 +138,3 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         populate()
-
