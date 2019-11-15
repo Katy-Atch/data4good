@@ -137,4 +137,4 @@ class Command(BaseCommand):
     help = "Populates the database"
 
     def handle(self, *args, **options):
-        populate()
+        populate() 
