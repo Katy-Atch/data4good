@@ -1,8 +1,6 @@
 from django.db import models
 from phone_field import PhoneField
 
-# test blah
-
 # Create your models here.
 class Site(models.Model):
     # Still need unique identifier for sites
@@ -22,8 +20,8 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     sso_or_sfsp = models.CharField(
-        max_length=20,
-        choices=program_choices,
+        max_length = 20,
+        choices = program_choices,
         default=OTHER,
     )
     # End defined by myself
@@ -53,8 +51,8 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     type_of_snp_org = models.CharField(
-        max_length=100,
-        choices=snp_org_choices,
+        max_length = 100,
+        choices = snp_org_choices,
         default=OTHER,
         null=True,
         blank=True,
@@ -76,8 +74,8 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     type_of_sfsp_org = models.CharField(
-        max_length=100,
-        choices=sfsp_org_choices,
+        max_length = 100,
+        choices = sfsp_org_choices,
         default=OTHER,
         null=True,
         blank=True,
@@ -95,7 +93,7 @@ class Site(models.Model):
     )
     rural_or_urban_code = models.CharField(
         max_length=20,
-        choices=rural_urban_choices,
+        choices = rural_urban_choices,
         null=True,
         blank=True,
     )
@@ -114,8 +112,8 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     sso_site_type = models.CharField(
-        max_length=20,
-        choices=sso_site_type_choices,
+        max_length = 20,
+        choices = sso_site_type_choices,
         default=OTHER,
         null=True,
         blank=True,
@@ -140,18 +138,26 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     sfsp_site_type = models.CharField(
-        max_length=100,
-        choices=sfsp_site_type_choices,
-        default=OTHER,
+        max_length = 100,
+        choices = sfsp_site_type_choices,
+        default = OTHER,
         null=True,
         blank=True,
     )
 
-    street_address1 = models.CharField(max_length=500)
-    street_address2 = models.CharField(max_length=500, null=True, blank=True)
-    street_city = models.CharField(max_length=500)
-    street_state = models.CharField(max_length=500)
-    street_zip = models.CharField(max_length=500)
+    street_address1 = models.CharField(max_length = 500)
+    street_address2 = models.CharField(max_length = 500, null=True, blank=True)
+    street_city = models.CharField(max_length = 500)
+    street_state = models.CharField(max_length = 500)
+    street_zip = models.CharField(max_length = 500)
+
+    geo_id = models.IntegerField()
+
+    mailing_address1 = models.CharField(max_length = 500, null=True, blank=True)
+    mailing_address2 = models.CharField(max_length = 500, null=True, blank=True)
+    mailing_city = models.CharField(max_length = 500, null=True, blank=True)
+    mailing_state = models.CharField(max_length = 500, null=True, blank=True)
+    mailing_zip = models.CharField(max_length = 500, null=True, blank=True)
 
     program_contact_salutation = models.CharField(max_length=500, null=True, blank=True)
     program_contact_first_name = models.CharField(max_length=500)
@@ -171,8 +177,6 @@ class Site(models.Model):
     end_date = models.DateTimeField()
     days_of_operation = models.CharField(max_length=500)
     meal_types_served = models.CharField(max_length=500)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     primary_auth_rep_salutation = models.CharField(max_length=500, null=True, blank=True)
     primary_auth_rep_first_name = models.CharField(max_length=500, null=True, blank=True)
@@ -185,6 +189,7 @@ class Site(models.Model):
         return self.name
 
 
+
 class CE(models.Model):
 
     # Defined by myself
@@ -193,7 +198,7 @@ class CE(models.Model):
     # End defined by myself
 
     # Unique identifier
-    ce_id = models.IntegerField(primary_key=True)
+    ce_id = models.IntegerField()
     name = models.CharField(max_length=500)
     county = models.CharField(max_length=500)
     program_year = models.CharField(max_length=500, null=True, blank=True)
@@ -214,19 +219,27 @@ class CE(models.Model):
     )
 
     type_of_agency = models.CharField(
-        max_length=100,
-        choices=agency_type_choices,
-        default=OTHER,
+        max_length = 100,
+        choices = agency_type_choices,
+        default = OTHER,
     )
 
     county_district_code = models.CharField(max_length=500, null=True, blank=True)
     esc = models.IntegerField()
     tda_region = models.IntegerField()
-    street_address1 = models.CharField(max_length=500)
-    street_address2 = models.CharField(max_length=500, null=True, blank=True)
-    street_city = models.CharField(max_length=500)
-    street_state = models.CharField(max_length=500)
-    street_zip = models.CharField(max_length=500)
+    street_address1 = models.CharField(max_length = 500)
+    street_address2 = models.CharField(max_length = 500, null=True, blank=True)
+    street_city = models.CharField(max_length = 500)
+    street_state = models.CharField(max_length = 500)
+    street_zip = models.CharField(max_length = 500)
+
+    geo_id = models.IntegerField()
+
+    mailing_address1 = models.CharField(max_length = 500)
+    mailing_address2 = models.CharField(max_length = 500, null=True, blank=True)
+    mailing_city = models.CharField(max_length = 500)
+    mailing_state = models.CharField(max_length = 500)
+    mailing_zip = models.CharField(max_length = 500)
 
     superintendent_salutation = models.CharField(max_length=500, null=True, blank=True)
     superintendent_first_name = models.CharField(max_length=500, null=True, blank=True)
@@ -242,8 +255,19 @@ class CE(models.Model):
     childnutdir_email = models.EmailField(null=True, blank=True)
     childnutdir_phone = PhoneField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
+class Geocodes(models.Model):
+
+    geo_id = models.IntegerField(primary_key=True)
+
+    street_address1 = models.CharField(max_length = 500)
+    street_address2 = models.CharField(max_length = 500, null=True, blank=True)
+    street_city = models.CharField(max_length = 500)
+    street_state = models.CharField(max_length = 500)
+    street_zip = models.CharField(max_length = 500)
+
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
-    def __str__(self):
-        return self.name
