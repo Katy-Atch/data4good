@@ -1,6 +1,7 @@
 import requests
 import enum
 import sys
+from datetime import datetime
 from django.core.management.base import BaseCommand
 sys.path.append("/code/pages/management/commands")
 from mapping import *
@@ -47,8 +48,10 @@ def create_entity(program, entity, row):
     elif entity == Entity.Site:
         new_object = Site()
 
-    for portal_attr, db_attr in attribute_list.items():
-        setattr(new_object, db_attr, get_if_available(portal_attr, row))
+    for db_attr, portal_attr in attribute_list.items():
+        setattr(new_object, db_attr, str(get_if_available(portal_attr, row)))
+
+    setattr(new_object, "last_updated", datetime.now())
 
     new_object.save()
 
@@ -70,8 +73,16 @@ def get_attribute_list(program, entity):
 
 # Checks if an old entity and new entity have the same values for all attributes
 def check_attributes(attribute_list, new_entity, old_entity):
-    for attribute in attribute_list:
-        if get_if_available(attribute, new_entity) != get_if_available(attribute, old_entity):
+    for db_attr, portal_attr in attribute_list.items():
+        new_attr = get_if_available(portal_attr, new_entity)
+        old_attr = getattr(old_entity, db_attr)
+        if isinstance(old_attr, int):
+            new_attr = int(new_attr)
+
+        if new_attr is None:
+            new_attr = "None"
+
+        if new_attr != old_attr:
             return False
     return True
 
@@ -83,12 +94,13 @@ def parse_json(json_data, program):
         new_ce_id = get_if_available('ceid', json_data[x])
         if new_ce_id is not None:
             existing_ce = CE.objects.filter(ce_id=new_ce_id, most_current_record=True)
-            if len(existing_ce) == 1:
+            if existing_ce.count() == 1:
+                old_ce = existing_ce.first()
                 # Check that all attributes match
-                if not check_attributes(get_attribute_list(program, Entity.CE), json_data[x], existing_ce):
+                if not check_attributes(get_attribute_list(program, Entity.CE), json_data[x], old_ce):
                     # Set most_current_record=False on old object
-                    existing_ce.most_current_record = False
-                    existing_ce.save()
+                    old_ce.most_current_record = False
+                    old_ce.save()
                     create_entity(program, Entity.CE, json_data[x])
             else:
                 # Not in database- create new object with most_current_record=True
@@ -100,23 +112,25 @@ def parse_json(json_data, program):
             if len(existing_site) == 1:
                 # Need better function for comparing names and addresses so that the strings are stripped of whitespace
                 # and punctuation
-                if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], existing_site):
-                    if not (existing_site.name == get_if_available('name', json_data[x]) or
-                            existing_site.street_address1 == get_if_available('sitestreetaddressline1', json_data[x])):
+                old_site = existing_site.first()
+                if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], old_site):
+                    if not (old_site.name == get_if_available('name', json_data[x]) or
+                            old_site.street_address1 == get_if_available('sitestreetaddressline1', json_data[x])):
                         # Different site- create new object, set most_current_object of old object to False
-                        existing_site.most_current_record = False
-                        existing_site.save()
+                        old_site.most_current_record = False
+                        old_site.save()
                         create_entity(program, Entity.Site, json_data[x])
             else:
                 create_entity(program, Entity.Site, json_data[x])
+                # Check for address with different side id but same name and address
 
 
 def populate():
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
     headers = {'X-App-Token': app_token}
     max_records = 50000
-    sso_portal = "3hpz-ajxk"
-    sfsp_portal = "rmea-7b2m"
+    sso_portal = "93u6-myq9k"
+    sfsp_portal = "myag-hymh"
 
     # GET SSO DATA
     response = requests.get('https://data.texas.gov/resource/' + sso_portal + '.json?$limit=' + str(max_records),
