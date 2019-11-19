@@ -20,3 +20,8 @@ import requests
 #     has no geolocation, it immediately makes a call to the endpoint to geocode it
 #     and then stores the record after geocoding the address
 
+def geocode_address(street_address1, street_address2, street_city, street_state, street_zip):
+    #Construct query then parse returned json. Next, enter into the database
+
+def add_to_geocode_db(latitude, longitude):
+    
