@@ -85,3 +85,14 @@ sso_ce_mapping = {
     "childnutdir_email": "childnutdiremail",
     "childnutdir_phone": "childnutdirphone"
 }
+
+geo_attributes = [
+    'geo_id',
+    'street_address1', 
+    'street_address2',
+    'street_city',
+    'street_state',
+    'street_zip',
+    'latitude',
+    'longitude'
+]

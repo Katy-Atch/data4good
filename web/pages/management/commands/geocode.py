@@ -1,4 +1,10 @@
 import requests
+from pages.models import Site, GEO
+from random import randint
+from pages.management.commands.mapping import geo_attributes
+
+LATITUDE = 0
+LONGITUDE = 1
 
 # Control flow of the script
 
@@ -21,7 +27,30 @@ import requests
 #     and then stores the record after geocoding the address
 
 def geocode_address(street_address1, street_address2, street_city, street_state, street_zip):
-    #Construct query then parse returned json. Next, enter into the database
 
-def add_to_geocode_db(latitude, longitude):
+    BingMapsAPIKey = 'Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c'
+    URL = "http://dev.virtualearth.net/REST/v1/Locations?q={street_address1}%20{street_address2}%20{street_city}%20{street_state}%20{street_zip}&key={BingMapsAPIKey}"
+    r = requests.get(URL)
+    data = r.json()
+
+    coordinates = data['resourceSets']['resources']['point']['coordinates']
+    latitude = coordinates[LATITUDE]
+    longitude = coordinates[LONGITUDE]
+    # TODO: create elegant method of creating geo_id
+    geo_id = randint(0,10)
+
+    create_geocode_object(geo_id, street_address1, street_address2, street_city, street_state, street_zip,
+                          latitude, longitude)
     
+    return geo_id
+
+
+def create_geocode_object(geo_id, street_address1, street_address2, street_city, street_state, 
+                          street_zip,latitude, longitude):
+    new_object = GEO()
+    variables = locals()
+    for key, value in variables:
+        if key in geo_attributes:
+            new_object.key = value
+
+    new_object.save()

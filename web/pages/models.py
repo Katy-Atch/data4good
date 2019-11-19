@@ -172,8 +172,6 @@ class Site(models.Model):
     end_date = models.DateTimeField()
     days_of_operation = models.CharField(max_length=500)
     meal_types_served = models.CharField(max_length=500)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     primary_auth_rep_salutation = models.CharField(max_length=500, null=True, blank=True)
     primary_auth_rep_first_name = models.CharField(max_length=500, null=True, blank=True)
@@ -245,9 +243,6 @@ class CE(models.Model):
     childnutdir_email = models.EmailField(null=True, blank=True)
     childnutdir_phone = PhoneField(null=True, blank=True)
 
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-
     def __str__(self):
         return self.name
 
@@ -260,4 +255,7 @@ class GEO(models.Model):
     street_city = models.CharField(max_length=500)
     street_state = models.CharField(max_length=500)
     street_zip = models.CharField(max_length=500)
+    
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
