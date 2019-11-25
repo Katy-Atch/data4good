@@ -4,7 +4,6 @@ site_mapping = {
     "ce_id": "ceid",
     "name": "sitename",
     "county": "sitecounty",
-    "sso_site_type": "sitetype",
     "street_address1": "sitestreetaddressline1",
     "street_address2": "sitestreetaddressline2",
     "start_date": "sitestartdate",
@@ -13,6 +12,7 @@ site_mapping = {
 
 sso_site_mapping = {
     "type_of_snp_org": "typeofsnporg",
+    "sso_site_type": "sitetype",
     "street_city": "sitestreetcity",
     "street_state": "sitestreetstate",
     "street_zip": "sitestreetzipcode",

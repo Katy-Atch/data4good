@@ -114,23 +114,21 @@ def parse_json(json_data, program):
                 # and punctuation
                 old_site = existing_site.first()
                 if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], old_site):
-                    if not (old_site.name == get_if_available('name', json_data[x]) or
-                            old_site.street_address1 == get_if_available('sitestreetaddressline1', json_data[x])):
-                        # Different site- create new object, set most_current_object of old object to False
-                        old_site.most_current_record = False
-                        old_site.save()
-                        create_entity(program, Entity.Site, json_data[x])
+                    # Need to do checks based on name & address
+                    old_site.most_current_record = False
+                    old_site.save()
+                    create_entity(program, Entity.Site, json_data[x])
             else:
+                # Not in database- create new object with most_current_record=True
                 create_entity(program, Entity.Site, json_data[x])
-                # Check for address with different side id but same name and address
-
+                
 
 def populate():
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
     headers = {'X-App-Token': app_token}
     max_records = 50000
-    sso_portal = "93u6-myq9k"
-    sfsp_portal = "myag-hymh"
+    sso_portal = "3hpz-ajxk"
+    sfsp_portal = "rmea-7b2m"
 
     # GET SSO DATA
     response = requests.get('https://data.texas.gov/resource/' + sso_portal + '.json?$limit=' + str(max_records),
