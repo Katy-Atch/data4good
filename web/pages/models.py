@@ -32,6 +32,7 @@ class Site(models.Model):
     program_year = models.CharField(max_length=500, null=True, blank=True)
     site_id = models.IntegerField()
     ce_id = models.IntegerField(null=True, blank=True)
+    geo_id = models.IntegerField()
     # ce_id = models.ForeignKey(
     #     'CE',
     #     on_delete=models.SET_NULL,
@@ -171,8 +172,6 @@ class Site(models.Model):
     end_date = models.DateTimeField()
     days_of_operation = models.CharField(max_length=500)
     meal_types_served = models.CharField(max_length=500)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     primary_auth_rep_salutation = models.CharField(max_length=500, null=True, blank=True)
     primary_auth_rep_first_name = models.CharField(max_length=500, null=True, blank=True)
@@ -197,6 +196,8 @@ class CE(models.Model):
     name = models.CharField(max_length=500)
     county = models.CharField(max_length=500)
     program_year = models.CharField(max_length=500, null=True, blank=True)
+
+    geo_id = models.IntegerField()
 
     EDUCATIONAL = 'EDUCATIONAL'
     GOV_AGENCY = 'GOV_AGENCY'
@@ -242,8 +243,19 @@ class CE(models.Model):
     childnutdir_email = models.EmailField(null=True, blank=True)
     childnutdir_phone = PhoneField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
+class GEO(models.Model):
+
+    geo_id = models.IntegerField()
+
+    street_address1 = models.CharField(max_length=500)
+    street_address2 = models.CharField(max_length=500, null=True, blank=True)
+    street_city = models.CharField(max_length=500)
+    street_state = models.CharField(max_length=500)
+    street_zip = models.CharField(max_length=500)
+    
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
-    def __str__(self):
-        return self.name
