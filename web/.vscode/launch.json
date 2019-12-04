@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         
+        
         {
             "name": "manage.py commands",
             "type": "python",
@@ -12,6 +13,16 @@
             "program": "${workspaceRoot}/manage.py",
                 "args": [
                     "fetchdata"
+                ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "manage.py geocode",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/manage.py",
+                "args": [
+                    "geocode"
                 ],
             "console": "integratedTerminal"
         }

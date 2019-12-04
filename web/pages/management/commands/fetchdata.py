@@ -114,6 +114,9 @@ def parse_json(json_data, program):
                 # and punctuation
                 old_site = existing_site.first()
                 if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], old_site):
+                    # TODO: Add check for if location info is the same. If not,
+                    # create_geocode_object() with lat/long NULL
+                    #  
                     # Need to do checks based on name & address
                     old_site.most_current_record = False
                     old_site.save()
@@ -121,7 +124,9 @@ def parse_json(json_data, program):
             else:
                 # Not in database- create new object with most_current_record=True
                 create_entity(program, Entity.Site, json_data[x])
-                
+                # TODO: create_geocode_object() with lat/long NULL
+
+    geocode_lat_long()      
 
 def populate():
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
@@ -143,6 +148,12 @@ def populate():
     parse_json(sfsp_data, Program.SFSP)
 
     return None
+
+def geocode_lat_long():
+    # For object in GEO
+    # Check if lat/long is NULL
+    # If so, geocode_address with object's location info
+    return 0
 
 
 class Command(BaseCommand):

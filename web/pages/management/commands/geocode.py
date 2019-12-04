@@ -1,6 +1,9 @@
 import requests
 from pages.models import Site, GEO
 from random import randint
+from django.core.management.base import BaseCommand
+import sys
+sys.path.append("/code/pages/management/commands")
 from pages.management.commands.mapping import geo_attributes
 
 LATITUDE = 0
@@ -26,31 +29,50 @@ LONGITUDE = 1
 #     has no geolocation, it immediately makes a call to the endpoint to geocode it
 #     and then stores the record after geocoding the address
 
-def geocode_address(street_address1, street_address2, street_city, street_state, street_zip):
+def geocode_address(geo_id, street_address1, street_address2, street_city, street_state, street_zip):
 
     BingMapsAPIKey = 'Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c'
-    URL = "http://dev.virtualearth.net/REST/v1/Locations?q={street_address1}%20{street_address2}%20{street_city}%20{street_state}%20{street_zip}&key={BingMapsAPIKey}"
+    URL = 'http://dev.virtualearth.net/REST/v1/Locations?q={0}%20{1}%20{2}%20{3}%20{4}&key={5}'.format(street_address1, 
+    street_address2, street_city, street_state, street_zip, BingMapsAPIKey)
     r = requests.get(URL)
     data = r.json()
 
-    coordinates = data['resourceSets']['resources']['point']['coordinates']
+    coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
     latitude = coordinates[LATITUDE]
     longitude = coordinates[LONGITUDE]
-    # TODO: create elegant method of creating geo_id
-    geo_id = randint(0,10)
 
-    create_geocode_object(geo_id, street_address1, street_address2, street_city, street_state, street_zip,
-                          latitude, longitude)
+    geo_object = GEO.objects.filter(geo_id=geo_id).first()
+    geo_object.latitude = latitude
+    geo_object.longitude = longitude
     
-    return geo_id
-
 
 def create_geocode_object(geo_id, street_address1, street_address2, street_city, street_state, 
                           street_zip,latitude, longitude):
-    new_object = GEO()
-    variables = locals()
-    for key, value in variables:
-        if key in geo_attributes:
-            new_object.key = value
+    new_geo_object = GEO()
+    assign_geo_values(new_geo_object, geo_id, street_address1, 
+    street_address2, street_city, street_state, 
+                          street_zip,latitude, longitude)
 
-    new_object.save()
+    new_geo_object.save()
+
+def create_geo_id():
+    # Replace with geo_id algorithm
+    return 0
+
+def assign_geo_values(new_geo_object, geo_id, street_address1, 
+    street_address2, street_city, street_state, 
+                          street_zip,latitude, longitude):
+    new_geo_object.geo_id = geo_id
+    new_geo_object.street_address1 = street_address1
+    new_geo_object.street_address2 = street_address2
+    new_geo_object.street_city = street_city
+    new_geo_object.street_state
+    new_geo_object.street_zip = street_zip 
+    new_geo_object.latitude = latitude
+    new_geo_object.longitude = longitude
+
+class Command(BaseCommand):
+    help = "Geocodes addresses"
+
+    def handle(self, *args, **options):
+        geocode_address('2733 Rosedale Ave', '', 'Dallas', 'TX', 75205)
