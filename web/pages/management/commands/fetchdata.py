@@ -109,7 +109,7 @@ def parse_json(json_data, program):
         new_site_id = get_if_available('siteid', json_data[x])
         if new_site_id is not None:
             existing_site = Site.objects.filter(ce_id=new_ce_id, site_id=new_site_id, most_current_record=True)
-            if len(existing_site) == 1:
+            if existing_site.count() == 1:
                 # Need better function for comparing names and addresses so that the strings are stripped of whitespace
                 # and punctuation
                 old_site = existing_site.first()

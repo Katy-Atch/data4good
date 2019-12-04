@@ -32,7 +32,7 @@ class Site(models.Model):
     program_year = models.CharField(max_length=500, null=True, blank=True)
     site_id = models.IntegerField()
     ce_id = models.IntegerField(null=True, blank=True)
-    geo_id = models.IntegerField()
+    geo_id = models.IntegerField(null=True, blank=True)
     # ce_id = models.ForeignKey(
     #     'CE',
     #     on_delete=models.SET_NULL,
@@ -197,7 +197,7 @@ class CE(models.Model):
     county = models.CharField(max_length=500)
     program_year = models.CharField(max_length=500, null=True, blank=True)
 
-    geo_id = models.IntegerField()
+    geo_id = models.IntegerField(null=True, blank=True)
 
     EDUCATIONAL = 'EDUCATIONAL'
     GOV_AGENCY = 'GOV_AGENCY'
@@ -248,7 +248,7 @@ class CE(models.Model):
 
 class GEO(models.Model):
 
-    geo_id = models.IntegerField()
+    geo_id = models.AutoField(primary_key=True)
 
     street_address1 = models.CharField(max_length=500)
     street_address2 = models.CharField(max_length=500, null=True, blank=True)
