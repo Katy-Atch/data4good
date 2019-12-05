@@ -39,7 +39,7 @@ def get_long(key, row):
         return None
 
 
-def create_entity(program, entity, row):
+def save_entity(program, entity, row):
     attribute_list = get_attribute_list(program, entity)
     new_object = None
 
@@ -72,7 +72,7 @@ def get_attribute_list(program, entity):
 
 
 # Checks if an old entity and new entity have the same values for all attributes
-def check_attributes(attribute_list, new_entity, old_entity):
+def attributes_match(attribute_list, new_entity, old_entity):
     for db_attr, portal_attr in attribute_list.items():
         new_attr = get_if_available(portal_attr, new_entity)
         old_attr = getattr(old_entity, db_attr)
@@ -89,43 +89,28 @@ def check_attributes(attribute_list, new_entity, old_entity):
 
 # Need to add another condition for if there are more than one entities- error
 # Need to only check a CE in the portal one time
-def parse_json(json_data, program):
-    for x in range(len(json_data)):
-        new_ce_id = get_if_available('ceid', json_data[x])
-        if new_ce_id is not None:
-            existing_ce = CE.objects.filter(ce_id=new_ce_id, most_current_record=True)
-            if existing_ce.count() == 1:
-                old_ce = existing_ce.first()
-                # Check that all attributes match
-                if not check_attributes(get_attribute_list(program, Entity.CE), json_data[x], old_ce):
-                    # Set most_current_record=False on old object
-                    old_ce.most_current_record = False
-                    old_ce.save()
-                    create_entity(program, Entity.CE, json_data[x])
-            else:
-                # Not in database- create new object with most_current_record=True
-                create_entity(program, Entity.CE, json_data[x])
-
-        new_site_id = get_if_available('siteid', json_data[x])
-        if new_site_id is not None:
-            existing_site = Site.objects.filter(ce_id=new_ce_id, site_id=new_site_id, most_current_record=True)
-            if existing_site.count() == 1:
-                # Need better function for comparing names and addresses so that the strings are stripped of whitespace
-                # and punctuation
-                old_site = existing_site.first()
-                if not check_attributes(get_attribute_list(program, Entity.Site), json_data[x], old_site):
-                    # TODO: Add check for if location info is the same. If not,
-                    # create_geocode_object() with lat/long NULL
-                    #  
-                    # Need to do checks based on name & address
-                    old_site.most_current_record = False
-                    old_site.save()
-                    create_entity(program, Entity.Site, json_data[x])
-            else:
-                # Not in database- create new object with most_current_record=True
-                create_entity(program, Entity.Site, json_data[x])
-                # TODO: create_geocode_object() with lat/long NULL
-
+def update_database(json_data, program):
+    for row in json_data:
+        new_ce_id = get_if_available('ceid', row)
+        new_site_id = get_if_available('siteid', row)
+        for typename, entity_model, extra_filter, entity_type in [(new_site_id, Site, {'site_id': new_site_id}, Entity.Site), (new_ce_id, CE, {}, Entity.CE)]:
+            if typename is not None:
+                existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
+                if existing.count() == 1:
+                    old = existing.first()
+                    if not attributes_match(get_attribute_list(program, entity_type), row, old):
+                        # TODO: Add check for if location info is the same. If not,
+                        # create_geocode_object() with lat/long NULL
+                        #  
+                        # Need to do checks based on name & address
+                        old.most_current_record = False
+                        old.save()
+                        save_entity(program, entity_type, row)
+                else:
+                    # Not in database- create new object with most_current_record=True
+                    save_entity(program, entity_type, row)
+                    # TODO: create_geocode_object() with lat/long NULL
+                
     geocode_lat_long()      
 
 def populate():
@@ -135,17 +120,19 @@ def populate():
     sso_portal = "3hpz-ajxk"
     sfsp_portal = "rmea-7b2m"
 
+    # Condense this into one for loop like above
+
     # GET SSO DATA
     response = requests.get('https://data.texas.gov/resource/' + sso_portal + '.json?$limit=' + str(max_records),
                             headers=headers)
     sso_data = response.json()
-    parse_json(sso_data, Program.SSO)
+    update_database(sso_data, Program.SSO)
 
     # GET SFSP DATA
     response = requests.get('https://data.texas.gov/resource/' + sfsp_portal + '.json?$limit=' + str(max_records),
                             headers=headers)
     sfsp_data = response.json()
-    parse_json(sfsp_data, Program.SFSP)
+    update_database(sfsp_data, Program.SFSP)
 
     return None
 
