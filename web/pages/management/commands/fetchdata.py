@@ -120,19 +120,14 @@ def populate():
     sso_portal = "3hpz-ajxk"
     sfsp_portal = "rmea-7b2m"
 
-    # Condense this into one for loop like above
-
-    # GET SSO DATA
-    response = requests.get('https://data.texas.gov/resource/' + sso_portal + '.json?$limit=' + str(max_records),
-                            headers=headers)
-    sso_data = response.json()
-    update_database(sso_data, Program.SSO)
-
-    # GET SFSP DATA
-    response = requests.get('https://data.texas.gov/resource/' + sfsp_portal + '.json?$limit=' + str(max_records),
-                            headers=headers)
-    sfsp_data = response.json()
-    update_database(sfsp_data, Program.SFSP)
+    for portal_id, entity_type in [(sso_portal, Program.SSO), (sfsp_portal, Program.SFSP)]:
+        response = requests.get(
+            'https://data.texas.gov/resource/' + portal_id + '.json',
+            params={'limit': str(max_records)},
+            headers=headers
+        )
+        data = response.json()
+        update_database(data, entity_type)
 
     return None
 
