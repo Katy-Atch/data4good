@@ -59,6 +59,7 @@
 
     {% for site in site_list %}
 
+    // site.latitude and site.longitude need to be replaced with accesses to the geocode table
     var siteMarker = L.circleMarker(["{{ site.latitude }}", "{{ site.longitude }}"], {
       renderer: myRenderer,
       radius: 3.0,
@@ -80,8 +81,4 @@
 </script> 
 
 </br>
-<form action="{% url 'update' %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Update">
-</form>
 {% endblock %}

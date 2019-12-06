@@ -15,10 +15,6 @@ def sponsor(request):
     ce_list = list(CE.objects.all())
     return render(request, "sponsor.html", {'ce_list': ce_list})
 
-def update(request):
-    call_command('fetchdata')
-    return HttpResponseRedirect(reverse('map'))
-
 def site_data(request):
     sites = serialize('json', Site.objects.all())
     return HttpResponse(sites, content_type='json')
