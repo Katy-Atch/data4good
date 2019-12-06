@@ -109,7 +109,7 @@ def update_database(json_data, program_type):
                     existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
                     if existing.count() == 1:
                             old = existing.first()
-                            if not attributes_match(get_attribute_list(program, entity_type), row, old):
+                            if not attributes_match(get_attribute_list(program_type, entity_type), row, old):
 
                                 geo_id = None
                                 # Compares location details of old row and new row. 
@@ -122,12 +122,12 @@ def update_database(json_data, program_type):
                                 # Need to do checks based on name & address
                                 old.most_current_record = False
                                 old.save()
-                                save_entity(program, entity_type, row, geo_id)
+                                save_entity(program_type, entity_type, row, geo_id)
                     else:
                         # Not in database- create new object with most_current_record=True
                         geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
                                 row.street_city, row.street_state, row.street_zip)
-                        save_entity(program, entity_type, row, geo_id)
+                        save_entity(program_type, entity_type, row, geo_id)
                 
     geocode_lat_long()      
 
