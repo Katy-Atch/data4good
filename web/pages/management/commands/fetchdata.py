@@ -130,6 +130,7 @@ def update_database(json_data, program_type):
                                 get('street_city', row), get('street_state', row), get('street_zip', row))
                         save_entity(program_type, entity_type, row, geo_id)
                 
+    # After checking rows, geocode rows with null lat/long
     geocode_lat_long()      
 
 def populate():
