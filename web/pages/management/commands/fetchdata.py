@@ -122,10 +122,11 @@ def populate():
 
     for portal_id, entity_type in [(sso_portal, Program.SSO), (sfsp_portal, Program.SFSP)]:
         response = requests.get(
-            'https://data.texas.gov/resource/' + portal_id + '.json',
-            params={'limit': str(max_records)},
+            'https://data.texas.gov/resource/' + portal_id + '.json?',
+            params={'$limit': max_records},
             headers=headers
         )
+        
         data = response.json()
         update_database(data, entity_type)
 
