@@ -20,7 +20,7 @@ class Entity(enum.Enum):
     Site = 2
 
 
-def get_if_available(key, row):
+def get(key, row):
     if key in row:
         return row[key]
     else:
@@ -51,7 +51,7 @@ def save_entity(program, entity, row, geo_id):
         new_object = Site()
 
     for db_attr, portal_attr in attribute_list.items():
-        setattr(new_object, db_attr, str(get_if_available(portal_attr, row)))
+        setattr(new_object, db_attr, str(get(portal_attr, row)))
 
     setattr(new_object, "last_updated", datetime.now())
     setattr(new_object, "geo_id", geo_id)
@@ -77,7 +77,7 @@ def get_attribute_list(program, entity):
 # Checks if an old entity and new entity have the same values for all attributes
 def attributes_match(attribute_list, new_entity, old_entity):
     for db_attr, portal_attr in attribute_list.items():
-        new_attr = get_if_available(portal_attr, new_entity)
+        new_attr = get(portal_attr, new_entity)
         old_attr = getattr(old_entity, db_attr)
         if isinstance(old_attr, int):
             new_attr = int(new_attr)
@@ -96,8 +96,8 @@ def update_database(json_data, program_type):
     for row in json_data:
         seen = False
 
-        new_site_id = get_if_available('siteid', row)
-        new_ce_id = get_if_available('ceid', row)
+        new_site_id = get('siteid', row)
+        new_ce_id = get('ceid', row)
         if new_ce_id not in seen_ce_list:
             seen_ce_list.add(new_ce_id)
         else:
@@ -108,21 +108,21 @@ def update_database(json_data, program_type):
                 if (entity_type == Entity.Site) or (entity_type == Entity.CE and not seen):
                     existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
                     if existing.count() == 1:
-                            old = existing.first()
-                            if not attributes_match(get_attribute_list(program_type, entity_type), row, old):
+                        old = existing.first()
+                        if not attributes_match(get_attribute_list(program_type, entity_type), row, old):
 
-                                geo_id = None
-                                # Compares location details of old row and new row. 
-                                if compare_location_details(old, row):
-                                    geo_id = old.geo_id
-                                else:
-                                    geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
-                                    row.street_city, row.street_state, row.street_zip)
+                            geo_id = None
+                            # Compares location details of old row and new row. 
+                            if compare_location_details(old, row):
+                                geo_id = old.geo_id
+                            else:
+                                geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
+                                row.street_city, row.street_state, row.street_zip)
 
-                                # Need to do checks based on name & address
-                                old.most_current_record = False
-                                old.save()
-                                save_entity(program_type, entity_type, row, geo_id)
+                            # Need to do checks based on name & address
+                            old.most_current_record = False
+                            old.save()
+                            save_entity(program_type, entity_type, row, geo_id)
                     else:
                         # Not in database- create new object with most_current_record=True
                         geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
