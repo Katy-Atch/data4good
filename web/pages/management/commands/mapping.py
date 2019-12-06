@@ -87,7 +87,6 @@ sso_ce_mapping = {
 }
 
 geo_attributes = [
-    'geo_id',
     'street_address1', 
     'street_address2',
     'street_city',

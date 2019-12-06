@@ -116,8 +116,9 @@ def update_database(json_data, program_type):
                             if compare_location_details(old, row):
                                 geo_id = old.geo_id
                             else:
-                                geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
-                                row.street_city, row.street_state, row.street_zip)
+                                # TODO: Find more elegant way to call these attributes
+                                geo_id = does_geocode_exist(get('street_address1', row), get('street_address2', row), 
+                                get('street_city', row), get('street_state', row), get('street_zip', row))
 
                             # Need to do checks based on name & address
                             old.most_current_record = False
@@ -125,8 +126,8 @@ def update_database(json_data, program_type):
                             save_entity(program_type, entity_type, row, geo_id)
                     else:
                         # Not in database- create new object with most_current_record=True
-                        geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
-                                row.street_city, row.street_state, row.street_zip)
+                        geo_id = does_geocode_exist(get('street_address1', row), get('street_address2', row), 
+                                get('street_city', row), get('street_state', row), get('street_zip', row))
                         save_entity(program_type, entity_type, row, geo_id)
                 
     geocode_lat_long()      
@@ -171,12 +172,14 @@ def does_geocode_exist(street_address1, street_address2, street_city, street_sta
 
 # Checks if the location details of the old and new objects are the same. Returns true if they are
 # and false if they are different            
-def compare_location_details(old_object, new_object):
-    return (old_object.street_address1 == new_object.street_address1 and
-            old_object.street_address2 == new_object.street_address2 and
-            old_object.street_city == new_object.street_city and
-            old_object.street_zip == new_object.street_zip and
-            old_object.street_state == new_object.street_state)
+def compare_location_details(old_object, row):
+    same_location_details = True
+    
+    for attribute in location_attributes:
+        if old_object.attribute != get(attribute, row):
+            same_location_details = False
+
+    return same_location_details
 
 class Command(BaseCommand):
     help = "Populates the database"

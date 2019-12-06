@@ -37,10 +37,13 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     r = requests.get(URL)
     data = r.json()
 
-    # Work in contingency for invalid address
-    coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
-    latitude = coordinates[LATITUDE]
-    longitude = coordinates[LONGITUDE]
+    latitude = 0
+    longitude = 0
+    # Checking if there exists a lat/long for the given location
+    if data['resourceSets'][0]['estimatedTotal'] > 0:
+        coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
+        latitude = coordinates[LATITUDE]
+        longitude = coordinates[LONGITUDE]
 
     geo_object = GEO.objects.filter(geo_id=geo_id).first()
     geo_object.latitude = latitude
@@ -61,6 +64,7 @@ def create_geocode_object(street_address1, street_address2, street_city, street_
 def assign_geo_values(new_geo_object, street_address1, 
     street_address2, street_city, street_state, 
                           street_zip,latitude, longitude):
+    # TODO: Find more elegant way to do this
     new_geo_object.street_address1 = street_address1
     new_geo_object.street_address2 = street_address2
     new_geo_object.street_city = street_city
