@@ -8,6 +8,7 @@ from mapping import *
 from pages.models import Site, CE, GEO
 from geocode import create_geocode_object, geocode_address
 
+seen_ce_list = set()
 
 class Program(enum.Enum):
     SFSP = 1
@@ -91,34 +92,42 @@ def attributes_match(attribute_list, new_entity, old_entity):
 
 # Need to add another condition for if there are more than one entities- error
 # Need to only check a CE in the portal one time
-def update_database(json_data, program):
+def update_database(json_data, program_type):
     for row in json_data:
-        new_ce_id = get_if_available('ceid', row)
+        seen = False
+
         new_site_id = get_if_available('siteid', row)
+        new_ce_id = get_if_available('ceid', row)
+        if new_ce_id not in seen_ce_list:
+            seen_ce_list.add(new_ce_id)
+        else:
+            seen = True
+        
         for typename, entity_model, extra_filter, entity_type in [(new_site_id, Site, {'site_id': new_site_id}, Entity.Site), (new_ce_id, CE, {}, Entity.CE)]:
             if typename is not None:
-                existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
-                if existing.count() == 1:
-                    old = existing.first()
-                    if not attributes_match(get_attribute_list(program, entity_type), row, old):
+                if (entity_type == Entity.Site) or (entity_type == Entity.CE and not seen):
+                    existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
+                    if existing.count() == 1:
+                            old = existing.first()
+                            if not attributes_match(get_attribute_list(program, entity_type), row, old):
 
-                        geo_id = None
-                        # Compares location details of old row and new row. 
-                        if compare_location_details(old, row):
-                            geo_id = old.geo_id
-                        else:
-                            geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
-                            row.street_city, row.street_state, row.street_zip)
+                                geo_id = None
+                                # Compares location details of old row and new row. 
+                                if compare_location_details(old, row):
+                                    geo_id = old.geo_id
+                                else:
+                                    geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
+                                    row.street_city, row.street_state, row.street_zip)
 
-                        # Need to do checks based on name & address
-                        old.most_current_record = False
-                        old.save()
+                                # Need to do checks based on name & address
+                                old.most_current_record = False
+                                old.save()
+                                save_entity(program, entity_type, row, geo_id)
+                    else:
+                        # Not in database- create new object with most_current_record=True
+                        geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
+                                row.street_city, row.street_state, row.street_zip)
                         save_entity(program, entity_type, row, geo_id)
-                else:
-                    # Not in database- create new object with most_current_record=True
-                    geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
-                            row.street_city, row.street_state, row.street_zip)
-                    save_entity(program, entity_type, row, geo_id)
                 
     geocode_lat_long()      
 
