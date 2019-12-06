@@ -37,6 +37,7 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     r = requests.get(URL)
     data = r.json()
 
+    # Work in contingency for invalid address
     coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
     latitude = coordinates[LATITUDE]
     longitude = coordinates[LONGITUDE]
