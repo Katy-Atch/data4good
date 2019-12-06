@@ -5,7 +5,8 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 sys.path.append("/code/pages/management/commands")
 from mapping import *
-from pages.models import Site, CE
+from pages.models import Site, CE, GEO
+from geocode import create_geocode_object, geocode_address
 
 
 class Program(enum.Enum):
@@ -39,7 +40,7 @@ def get_long(key, row):
         return None
 
 
-def save_entity(program, entity, row):
+def save_entity(program, entity, row, geo_id):
     attribute_list = get_attribute_list(program, entity)
     new_object = None
 
@@ -52,6 +53,7 @@ def save_entity(program, entity, row):
         setattr(new_object, db_attr, str(get_if_available(portal_attr, row)))
 
     setattr(new_object, "last_updated", datetime.now())
+    setattr(new_object, "geo_id", geo_id)
 
     new_object.save()
 
@@ -99,17 +101,24 @@ def update_database(json_data, program):
                 if existing.count() == 1:
                     old = existing.first()
                     if not attributes_match(get_attribute_list(program, entity_type), row, old):
-                        # TODO: Add check for if location info is the same. If not,
-                        # create_geocode_object() with lat/long NULL
-                        #  
+
+                        geo_id = None
+                        # Compares location details of old row and new row. 
+                        if compare_location_details(old, row):
+                            geo_id = old.geo_id
+                        else:
+                            geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
+                            row.street_city, row.street_state, row.street_zip)
+
                         # Need to do checks based on name & address
                         old.most_current_record = False
                         old.save()
-                        save_entity(program, entity_type, row)
+                        save_entity(program, entity_type, row, geo_id)
                 else:
                     # Not in database- create new object with most_current_record=True
-                    save_entity(program, entity_type, row)
-                    # TODO: create_geocode_object() with lat/long NULL
+                    geo_id = does_geocode_exist(row.street_address1, row.street_address2, 
+                            row.street_city, row.street_state, row.street_zip)
+                    save_entity(program, entity_type, row, geo_id)
                 
     geocode_lat_long()      
 
@@ -132,12 +141,33 @@ def populate():
 
     return None
 
+# Loops through each item in the GEO table which needs geocoding and geocodes/saves the object
 def geocode_lat_long():
-    # For object in GEO
-    # Check if lat/long is NULL
-    # If so, geocode_address with object's location info
-    return 0
+    for item in GEO.objects.filter(latitude=None, longitude=None):
+        geocode_address(item.geo_id, item.street_address1, item.street_address2, 
+        item.street_city, item.street_state, item.street_zip)
 
+# Checks if geocode with given location details exists. If so, return the associated geo_id. If not,
+# Create new GEO object with given location details, and return its geo_id
+def does_geocode_exist(street_address1, street_address2, street_city, street_state, street_zip):
+    existing = GEO.objects.filter(street_address1=street_address1, street_address2=street_address2,
+                                  street_city=street_city, street_state=street_state, street_zip=street_zip)
+    
+    if existing.count() == 1:
+        return existing.first().geo_id
+    else:
+        return create_geocode_object(street_address1, street_address2, 
+                            street_city, street_state, street_zip, None, None)
+    
+
+# Checks if the location details of the old and new objects are the same. Returns true if they are
+# and false if they are different            
+def compare_location_details(old_object, new_object):
+    return (old_object.street_address1 == new_object.street_address1 and
+            old_object.street_address2 == new_object.street_address2 and
+            old_object.street_city == new_object.street_city and
+            old_object.street_zip == new_object.street_zip and
+            old_object.street_state == new_object.street_state)
 
 class Command(BaseCommand):
     help = "Populates the database"

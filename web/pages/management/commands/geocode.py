@@ -44,29 +44,26 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     geo_object = GEO.objects.filter(geo_id=geo_id).first()
     geo_object.latitude = latitude
     geo_object.longitude = longitude
+    geo_object.save()
     
 
-def create_geocode_object(geo_id, street_address1, street_address2, street_city, street_state, 
+def create_geocode_object(street_address1, street_address2, street_city, street_state, 
                           street_zip,latitude, longitude):
     new_geo_object = GEO()
-    assign_geo_values(new_geo_object, geo_id, street_address1, 
+    assign_geo_values(new_geo_object, street_address1, 
     street_address2, street_city, street_state, 
                           street_zip,latitude, longitude)
 
     new_geo_object.save()
+    return new_geo_object.geo_id
 
-def create_geo_id():
-    # Replace with geo_id algorithm
-    return 0
-
-def assign_geo_values(new_geo_object, geo_id, street_address1, 
+def assign_geo_values(new_geo_object, street_address1, 
     street_address2, street_city, street_state, 
                           street_zip,latitude, longitude):
-    new_geo_object.geo_id = geo_id
     new_geo_object.street_address1 = street_address1
     new_geo_object.street_address2 = street_address2
     new_geo_object.street_city = street_city
-    new_geo_object.street_state
+    new_geo_object.street_state = street_state
     new_geo_object.street_zip = street_zip 
     new_geo_object.latitude = latitude
     new_geo_object.longitude = longitude
@@ -75,4 +72,4 @@ class Command(BaseCommand):
     help = "Geocodes addresses"
 
     def handle(self, *args, **options):
-        geocode_address('2733 Rosedale Ave', '', 'Dallas', 'TX', 75205)
+        geocode_address(0, '2733 Rosedale Ave', '', 'Dallas', 'TX', 75205)
