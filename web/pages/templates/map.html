@@ -14,8 +14,8 @@
 {% endblock %}
 
 {% block content %}
-<h3>Texas Hunger Initiative Site Locations</h3>
-<h6>Click on a location to view more details regarding finding and/or contacting that particular site.</h6>
+{% block header %}
+{% endblock %}
 
 <div id="mapContainer">
   {% leaflet_map "main" callback="window.map_init" %}
@@ -65,7 +65,7 @@
       radius: 3.0,
       fillOpacity: 1.0,
       color: '#820000'
-    }).addTo(map).bindPopup("<a href={% url 'details' site.id %}>{{ site.name|title }}</a>")
+    }).addTo(map).bindPopup("<a href={% url 'site_details' site.id %}>{{ site.name|title }}</a>")
     .on('mouseover', function(e){
       this.openPopup();
     })
@@ -73,7 +73,7 @@
       this.openPopup();
     })
     .on('dblclick', function(e){
-      window.open('{% url "details" site.id %}')
+      window.open('{% url "site_details" site.id %}')
     })
 
     {% endfor %}

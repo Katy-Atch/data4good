@@ -5,11 +5,9 @@ from django.urls import reverse
 from django.core.serializers import serialize
 from django.core.management import call_command
 
-# Create your views here.
-def map(request):
-    # Needs to be site list OR sponsor list,
+def site(request):
     site_list = list(Site.objects.all())
-    return render(request, "map.html", {'site_list': site_list})
+    return render(request, "site.html", {'site_list': site_list})
 
 def sponsor(request):
     ce_list = list(CE.objects.all())
@@ -19,9 +17,13 @@ def site_data(request):
     sites = serialize('json', Site.objects.all())
     return HttpResponse(sites, content_type='json')
 
-def details(request, siteid):
+def site_details(request, siteid):
     site = get_object_or_404(Site, pk=siteid)
-    return render(request, 'details.html', {'site': site})
+    return render(request, 'site_details.html', {'site': site})
+
+def sponsor_details(request, ceid):
+    sponsor = get_object_or_404(CE, pk=ceid)
+    return render(request, 'sponsor_details.html', {'sponsor': sponsor})
 
 def points(request):
     if request.method == 'GET':
