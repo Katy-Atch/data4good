@@ -4,7 +4,7 @@ from random import randint
 from django.core.management.base import BaseCommand
 import sys
 sys.path.append("/code/pages/management/commands")
-from pages.management.commands.mapping import geo_attributes
+from mapping import Mapping, GeoAttributes
 
 LATITUDE = 0
 LONGITUDE = 1

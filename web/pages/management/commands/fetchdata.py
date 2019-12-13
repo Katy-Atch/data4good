@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 from django.core.management.base import BaseCommand
 sys.path.append("/code/pages/management/commands")
-from mapping import *
+from mapping import Mapping, GeoAttributes
 from pages.models import Site, CE, GEO
 from geocode import create_geocode_object, geocode_address
 
@@ -20,11 +20,16 @@ class Entity(enum.Enum):
     Site = 2
 
 
-def get(key, row):
+def get_from_row(key, row):
     if key in row:
         return row[key]
     else:
         return None
+
+
+def get_mapped_attr(key_dict, key, row):
+    attribute = key_dict[key]
+    return get_from_row(attribute, row)
 
 
 def get_lat(key, row):
@@ -42,7 +47,7 @@ def get_long(key, row):
 
 
 def save_entity(program, entity, row, geo_id):
-    attribute_list = get_attribute_list(program, entity)
+    key_dict = get_key_dict(program, entity)
     new_object = None
 
     if entity == Entity.CE:
@@ -50,8 +55,8 @@ def save_entity(program, entity, row, geo_id):
     elif entity == Entity.Site:
         new_object = Site()
 
-    for db_attr, portal_attr in attribute_list.items():
-        setattr(new_object, db_attr, str(get(portal_attr, row)))
+    for db_attr, portal_attr in key_dict.items():
+        setattr(new_object, db_attr, str(get_from_row(portal_attr, row)))
 
     setattr(new_object, "last_updated", datetime.now())
     setattr(new_object, "geo_id", geo_id)
@@ -61,23 +66,23 @@ def save_entity(program, entity, row, geo_id):
 
 # Gets the mapping of portal name : database name for an entity based
 # on what type of entity (Site, CE) and the program (SSO, SFSP)
-def get_attribute_list(program, entity):
+def get_key_dict(program, entity):
     if program == Program.SSO:
         if entity == Entity.CE:
-            return {**ce_mapping, **sso_ce_mapping}
+            return {**Mapping.ce_mapping, **Mapping.sso_ce_mapping}
         elif entity == Entity.Site:
-            return {**site_mapping, **sso_site_mapping}
+            return {**Mapping.site_mapping, **Mapping.sso_site_mapping}
     elif program == Program.SFSP:
         if entity == Entity.CE:
-            return ce_mapping
+            return Mapping.ce_mapping
         elif entity == Entity.Site:
-            return {**site_mapping, **sfsp_site_mapping}
+            return {**Mapping.site_mapping, **Mapping.sfsp_site_mapping}
 
 
 # Checks if an old entity and new entity have the same values for all attributes
-def attributes_match(attribute_list, new_entity, old_entity):
-    for db_attr, portal_attr in attribute_list.items():
-        new_attr = get(portal_attr, new_entity)
+def attributes_match(key_dict, new_entity, old_entity):
+    for db_attr, portal_attr in key_dict.items():
+        new_attr = get_from_row(portal_attr, new_entity)
         old_attr = getattr(old_entity, db_attr)
         if isinstance(old_attr, int):
             new_attr = int(new_attr)
@@ -96,8 +101,8 @@ def update_database(json_data, program_type):
     for row in json_data:
         seen = False
 
-        new_site_id = get('siteid', row)
-        new_ce_id = get('ceid', row)
+        new_site_id = get_from_row('siteid', row)
+        new_ce_id = get_from_row('ceid', row)
         if new_ce_id not in seen_ce_list:
             seen_ce_list.add(new_ce_id)
         else:
@@ -107,18 +112,19 @@ def update_database(json_data, program_type):
             if typename is not None:
                 if (entity_type == Entity.Site) or (entity_type == Entity.CE and not seen):
                     existing = entity_model.objects.filter(ce_id=new_ce_id, most_current_record=True, **extra_filter)
+                    key_dict = get_key_dict(program_type, entity_type)
                     if existing.count() == 1:
                         old = existing.first()
-                        if not attributes_match(get_attribute_list(program_type, entity_type), row, old):
+                        if not attributes_match(get_key_dict(program_type, entity_type), row, old):
 
                             geo_id = None
                             # Compares location details of old row and new row. 
-                            if compare_location_details(old, row):
+                            if compare_location_details(old, row, key_dict):
                                 geo_id = old.geo_id
                             else:
                                 # TODO: Find more elegant way to call these attributes
-                                geo_id = does_geocode_exist(get('street_address1', row), get('street_address2', row), 
-                                get('street_city', row), get('street_state', row), get('street_zip', row))
+                                geo_id = does_geocode_exist(get_mapped_attr(key_dict,'street_address1', row), get_mapped_attr(key_dict,'street_address2', row), 
+                                get_mapped_attr(key_dict,'street_city', row), get_mapped_attr(key_dict,'street_state', row), get_mapped_attr(key_dict,'street_zip', row))
 
                             # Need to do checks based on name & address
                             old.most_current_record = False
@@ -126,8 +132,8 @@ def update_database(json_data, program_type):
                             save_entity(program_type, entity_type, row, geo_id)
                     else:
                         # Not in database- create new object with most_current_record=True
-                        geo_id = does_geocode_exist(get('street_address1', row), get('street_address2', row), 
-                                get('street_city', row), get('street_state', row), get('street_zip', row))
+                        geo_id = does_geocode_exist(get_mapped_attr(key_dict, 'street_address1', row), get_mapped_attr(key_dict,'street_address2', row), 
+                                get_mapped_attr(key_dict,'street_city', row), get_mapped_attr(key_dict,'street_state', row), get_mapped_attr(key_dict,'street_zip', row))
                         save_entity(program_type, entity_type, row, geo_id)
                 
     # After checking rows, geocode rows with null lat/long
@@ -173,14 +179,13 @@ def does_geocode_exist(street_address1, street_address2, street_city, street_sta
 
 # Checks if the location details of the old and new objects are the same. Returns true if they are
 # and false if they are different            
-def compare_location_details(old_object, row):
-    same_location_details = True
+def compare_location_details(old_object, row, key_dict):
     
-    for attribute in location_attributes:
-        if old_object.attribute != get(attribute, row):
-            same_location_details = False
+    for attribute in GeoAttributes.location_attributes:
+        if getattr(old_object, attribute) != get_mapped_attr(key_dict, attribute, row):
+            return False
 
-    return same_location_details
+    return True
 
 class Command(BaseCommand):
     help = "Populates the database"
