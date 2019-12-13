@@ -7,7 +7,7 @@
         
         
         {
-            "name": "manage.py commands",
+            "name": "manage.py fetchdata",
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/manage.py",
