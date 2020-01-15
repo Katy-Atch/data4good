@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load leaflet_tags %}
+
+{% block links %}
+{% leaflet_js %}
+{% leaflet_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+<style type="text/css">
+  #details {
+    width: 100%;
+    height: 600px;
+  }
+</style>
+{% endblock %}
+
+{% block title %}Details- {{ sponsor.name }}{% endblock %}
+
+{% block content %}
+<h3>{{ sponsor.name|title }}</h3>
+<div class="row">
+  <div class="col-3">
+      <p>Type of Agency: {{ sponsor.type_of_agency }}</p>
+  </div>
+  <div class="col-3">
+    <p>County: {{ sponsor.county }}</p>
+  </div>
+</div>
+<br>
+
+<div id="mapContainer">
+    {% if sponsor.longitude != null and sponsor.latitude != null %}
+    {% leaflet_map "details" callback="window.map_init" %}
+    {% else %}
+    <p>(No map data available)</p>
+    {% endif %}
+</div>
+<br>
+<h6 class="d-inline">Address: </h6>
+<p class="d-inline">{{ sponsor.street_address1|title }}
+{% if sponsor.street_address2 != null %}
+{{ sponsor.street_address2|title }}
+{% endif %} 
+{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}</p>
+<br><br> 
+<div class="row">
+  {% if sponsor.superintendent_salutation != null or sponsor.superintendent_first_name != null or sponsor.superintendent_last_name != null %}
+  <div class="col-4">
+    <h6>Program Contact</h6>
+    <p class="mb-0">
+      {{ sponsor.superintendent_salutation}}
+      {{ sponsor.superintendent_first_name }}
+      {{ sponsor.superintendent_last_name }}
+    </p>
+    <p class="mb-0"><i>{{ sponsor.superintendent_title_position }}</i></p>
+    <p class="mb-0">{{ sponsor.superintendent_email }}</p>
+    <p class="mb-0">{{ sponsor.superintendent_phone }}</p>
+    
+  </div>
+  {% endif %}
+  {% if sponsor.childnutdir_salutation != null or sponsor.childnutdir_first_name != null or sponsor.childnutdir_last_name != null %}
+  <div class="col-4">
+    <h6>Site Supervisor</h6>
+    <p>
+      {{ sponsor.childnutdir_salutation }}
+      {{ sponsor.childnutdir_first_name }}
+      {{ sponsor.childnutdir_last_name }}
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+
+<script type="text/javascript">
+    function map_init(map,options){
+  
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets',
+        accessToken: 'pk.eyJ1Ijoia2F0eWF0Y2giLCJhIjoiY2pzbzJiMHFuMGk4YjQ5cnJ4a2NqajdkMSJ9.BklRaDWgtluGgXiAb6YsmA'
+    }).addTo(map);
+
+      map.setView([{{ sponsor.latitude }}, {{ sponsor.longitude }}], 14)
+  
+      L.marker([{{ sponsor.latitude }}, {{ sisponsorte.longitude }}]).addTo(map)
+      .bindPopup(
+        "{{ sponsor.name|title }}<br>{{ sponsor.street_address1|title }}<br>{% if sponsor.street_address2 != null %}{{ sponsor.street_address2|title }}<br>{% endif %}{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}"
+        ).openPopup();
+    }
+  </script>
+{% endblock %}

@@ -14,20 +14,12 @@
 {% endblock %}
 
 {% block content %}
-<h3>Texas Hunger Initiative Site Locations</h3>
-<h6>Click on a location to view more details regarding finding and/or contacting that particular site.</h6>
+{% block header %}
+{% endblock %}
 
 <div id="mapContainer">
   {% leaflet_map "main" callback="window.map_init" %}
 </div>
-<!-- <div>
-  <h5>Not pictured</h5>
-  {% for site in site_list %}
-  {% if site.longitude == null or site.latitude == null %}
-  <a class="d-block" href="{% url 'details' site.id %}">{{ site.name|title}} {{site.street_city|title}}, TX</a>
-  {% endif %}
-  {% endfor %}
-</div> -->
 
 <script type="text/javascript">
 
@@ -37,6 +29,8 @@
       get_points(map, options);
     });
   }
+
+  map.on('zoomend', get_points(map));
 
   function create_tile_layer(map, options) {
     // Add tile layer to map
@@ -48,31 +42,30 @@
     }).addTo(map);
   }
 
-  function get_points(map, options) {
-    map.on('zoomend', function(e){
-      var bottom_left = L.getBounds().getSouthWest();
-      var top_right = L.getBounds().getNorthEast();
-      $.ajax({
-        type:"GET",
-        url: "points",
-        data:{south_west: bottom_left, north_east: top_right},
-        success: render_points(map, options, sites)
-      })
-    });
+  function get_points(map) {
+    var bottom_left = map.getBounds().getSouthWest();
+    var top_right = map.getBounds().getNorthEast();
+    $.ajax({
+      type:"GET",
+      url: "points",
+      data:{south_west: bottom_left, north_east: top_right},
+      success: render_points(map, sites)
+    })
   }
 
-  function render_points(map, options, site_list) {
+  function render_points(map, site_list) {
     // Renderer for plotting points on canvas
     var myRenderer = L.canvas({ padding: 0.25 });
 
     {% for site in site_list %}
 
+    // site.latitude and site.longitude need to be replaced with accesses to the geocode table
     var siteMarker = L.circleMarker(["{{ site.latitude }}", "{{ site.longitude }}"], {
       renderer: myRenderer,
       radius: 3.0,
       fillOpacity: 1.0,
       color: '#820000'
-    }).addTo(map).bindPopup("<a href={% url 'details' site.id %}>{{ site.name|title }}</a>")
+    }).addTo(map).bindPopup("<a href={% url 'site_details' site.id %}>{{ site.name|title }}</a>")
     .on('mouseover', function(e){
       this.openPopup();
     })
@@ -80,7 +73,7 @@
       this.openPopup();
     })
     .on('dblclick', function(e){
-      window.open('{% url "details" site.id %}')
+      window.open('{% url "site_details" site.id %}')
     })
 
     {% endfor %}
@@ -88,8 +81,4 @@
 </script> 
 
 </br>
-<form action="{% url 'update' %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Update">
-</form>
 {% endblock %}
