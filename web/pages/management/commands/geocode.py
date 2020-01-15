@@ -34,6 +34,7 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     BingMapsAPIKey = 'Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c'
     URL = 'http://dev.virtualearth.net/REST/v1/Locations?q={0}%20{1}%20{2}%20{3}%20{4}&key={5}'.format(street_address1, 
     street_address2, street_city, street_state, street_zip, BingMapsAPIKey)
+    # TODO: Change URL building, look at populate() method for example
     r = requests.get(URL)
     data = r.json()
 
