@@ -17,13 +17,33 @@
 
 {% block content %}
 <h3>{{ site.name|title }}</h3>
+<br>
 <div class="row">
-  <div class="col-3">
-      <p>Days of operation: {{ site.days_of_operation }}</p>
+  {% if site.breakfast_days_served != null or site.breakfast_time != null %}
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+    <p><strong>Breakfast</strong>: {{ site.breakfast_days_served }}, {{ site.breakfast_time }}</p>
   </div>
-  <div class="col-3">
-    <p>Meals served: {{ site.meal_types_served }}</p>
+  {% endif %}
+  {% if site.amsnack_days_served != null or site.amsnack_time != null %}
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+    <p><strong>Morning Snack</strong>: {{ site.amsnack_days_served }}, {{ site.amsnack_time }}</p>
   </div>
+  {% endif %}
+  {% if site.lunch_days_served != null or site.lunch_time != null %}
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+    <p><strong>Lunch</strong>: {{ site.lunch_days_served }}, {{ site.lunch_time }}</p>
+  </div>
+  {% endif %}
+  {% if site.pmsnack_days_served != null or site.pmsnack_time != null %}
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+    <p><strong>Afternoon Snack</strong>: {{ site.pmsnack_days_served }}, {{ site.pmsnack_time }}</p>
+  </div>
+  {% endif %}
+  {% if site.supper_days_served != null or site.supper_time != null %}
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+    <p><strong>Supper</strong>: {{ site.supper_days_served }}, {{ site.supper_time }}</p>
+  </div>
+  {% endif %}
 </div>
 <br>
 
@@ -44,7 +64,7 @@
 <br><br> 
 <div class="row">
   {% if site.program_contact_salutation != null or site.program_contact_first_name != null or site.program_contact_last_name != null %}
-  <div class="col-4">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Program Contact</h6>
     <p class="mb-0">
       {{ site.program_contact_salutation}}
@@ -58,7 +78,7 @@
   </div>
   {% endif %}
   {% if site.site_supervisor_salutation != null or site.site_supervisor_first_name != null or site.site_supervisor_last_name != null %}
-  <div class="col-4">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Site Supervisor</h6>
     <p>
       {{ site.site_supervisor_salutation }}
@@ -68,7 +88,7 @@
   </div>
   {% endif %}
   {% if site.primary_auth_rep_salutation != null or site.primary_auth_rep_first_name != null or site.primary_auth_rep_last_name != null %}
-  <div class="col=4">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Primary Authorized Representative</h6>
     <p>
       {{ site.primary_auth_rep_salutation }}

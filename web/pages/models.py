@@ -180,6 +180,17 @@ class Site(models.Model):
     primary_auth_rep_email = models.EmailField(null=True, blank=True)
     primary_auth_rep_phone = PhoneField(null=True, blank=True)
 
+    breakfast_time = models.CharField(max_length=20, null=True, blank=True)
+    amsnack_time = models.CharField(max_length=20, null=True, blank=True)
+    lunch_time = models.CharField(max_length=20, null=True, blank=True)
+    pmsnack_time = models.CharField(max_length=20, null=True, blank=True)
+    supper_time = models.CharField(max_length=20, null=True, blank=True)
+    breakfast_days_served = models.CharField(max_length=30, null=True, blank=True)
+    amsnack_days_served = models.CharField(max_length=30, null=True, blank=True)
+    lunch_days_served = models.CharField(max_length=30, null=True, blank=True)
+    pmsnack_days_served = models.CharField(max_length=30, null=True, blank=True)
+    supper_days_served = models.CharField(max_length=30, null=True, blank=True)
+
     def __str__(self):
         return self.name
 
@@ -196,6 +207,7 @@ class CE(models.Model):
     name = models.CharField(max_length=500)
     county = models.CharField(max_length=500)
     program_year = models.CharField(max_length=500, null=True, blank=True)
+    ce_status = models.CharField(max_length=20, null=True, blank=True)
 
     geo_id = models.IntegerField(null=True, blank=True)
 

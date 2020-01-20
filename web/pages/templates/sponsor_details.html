@@ -17,12 +17,16 @@
 
 {% block content %}
 <h3>{{ sponsor.name|title }}</h3>
+<br>
 <div class="row">
-  <div class="col-3">
-      <p>Type of Agency: {{ sponsor.type_of_agency|title }}</p>
+  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
+      <p><strong>Type of Agency</strong>: {{ sponsor.type_of_agency|title }}</p>
   </div>
-  <div class="col-3">
-    <p>County: {{ sponsor.county|title }}</p>
+  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
+    <p><strong>County</strong>: {{ sponsor.county|title }}</p>
+  </div>
+  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
+    <p><strong>Status</strong>: {{ sponsor.ce_status|title }}</p>
   </div>
 </div>
 <br>
@@ -44,7 +48,7 @@
 <br><br> 
 <div class="row">
   {% if sponsor.superintendent_salutation != null or sponsor.superintendent_first_name != null or sponsor.superintendent_last_name != null %}
-  <div class="col-4">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Program Contact</h6>
     <p class="mb-0">
       {{ sponsor.superintendent_salutation}}
@@ -58,7 +62,7 @@
   </div>
   {% endif %}
   {% if sponsor.childnutdir_salutation != null or sponsor.childnutdir_first_name != null or sponsor.childnutdir_last_name != null %}
-  <div class="col-4">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Site Supervisor</h6>
     <p>
       {{ sponsor.childnutdir_salutation }}

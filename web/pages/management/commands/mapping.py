@@ -8,7 +8,17 @@ class Mapping:
         "street_address1": "sitestreetaddressline1",
         "street_address2": "sitestreetaddressline2",
         "start_date": "sitestartdate",
-        "end_date": "siteenddate"
+        "end_date": "siteenddate",
+        "breakfast_time": "breakfasttime",
+        "breakfast_days_served": "breakfastdaysserved",
+        "amsnack_time": "amsnacktime",
+        "amsnack_days_served": "amsnackdaysserved",
+        "lunch_time": "lunchtime",
+        "lunch_days_served": "lunchdaysserved",
+        "pmsnack_time": "pmsnacktime",
+        "pmsnack_days_served": "pmsnackdaysserved",
+        "supper_time": "suppertime",
+        "supper_days_served": "supperdaysserved",
     }
 
     sso_site_mapping = {
@@ -69,7 +79,8 @@ class Mapping:
         "street_address2": "cestreetaddressline2",
         "street_city": "cestreetaddresscity",
         "street_state": "cestreetaddressstate",
-        "street_zip": "cestreetaddresszipcode"
+        "street_zip": "cestreetaddresszipcode",
+        "ce_status": "cestatus"
     }
 
     sso_ce_mapping = {
