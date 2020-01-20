@@ -13,22 +13,22 @@
 </style>
 {% endblock %}
 
-{% block title %}Details- {{ sponsor.name }}{% endblock %}
+{% block title %}{{ sponsor.name }}{% endblock %}
 
 {% block content %}
 <h3>{{ sponsor.name|title }}</h3>
 <div class="row">
   <div class="col-3">
-      <p>Type of Agency: {{ sponsor.type_of_agency }}</p>
+      <p>Type of Agency: {{ sponsor.type_of_agency|title }}</p>
   </div>
   <div class="col-3">
-    <p>County: {{ sponsor.county }}</p>
+    <p>County: {{ sponsor.county|title }}</p>
   </div>
 </div>
 <br>
 
 <div id="mapContainer">
-    {% if sponsor.longitude != null and sponsor.latitude != null %}
+    {% if sponsor.geo_id != null %}
     {% leaflet_map "details" callback="window.map_init" %}
     {% else %}
     <p>(No map data available)</p>
@@ -72,6 +72,17 @@
 
 <script type="text/javascript">
     function map_init(map,options){
+
+      $.ajax({
+          type:"GET",
+          url: "{% url 'get_geo' %}",
+          contentType: "application/json",
+          data: {geo_id: {{ sponsor.geo_id }} },
+          success: function(data) {
+            entity = JSON.parse(data.geo);
+            addPopup(entity[0]);
+          }
+        })
   
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -80,12 +91,14 @@
         accessToken: 'pk.eyJ1Ijoia2F0eWF0Y2giLCJhIjoiY2pzbzJiMHFuMGk4YjQ5cnJ4a2NqajdkMSJ9.BklRaDWgtluGgXiAb6YsmA'
     }).addTo(map);
 
-      map.setView([{{ sponsor.latitude }}, {{ sponsor.longitude }}], 14)
-  
-      L.marker([{{ sponsor.latitude }}, {{ sisponsorte.longitude }}]).addTo(map)
-      .bindPopup(
-        "{{ sponsor.name|title }}<br>{{ sponsor.street_address1|title }}<br>{% if sponsor.street_address2 != null %}{{ sponsor.street_address2|title }}<br>{% endif %}{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}"
-        ).openPopup();
+      function addPopup(entity) {
+        map.setView([entity.fields.latitude, entity.fields.longitude], 14);
+
+        L.marker([entity.fields.latitude, entity.fields.longitude]).addTo(map)
+        .bindPopup(
+          "{{ sponsor.name|title }}<br>{{ sponsor.street_address1|title }}<br>{% if sponsor.street_address2 != 'None' %}{{ sponsor.street_address2|title }}<br>{% endif %}{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}"
+          ).openPopup();
+      }
     }
   </script>
 {% endblock %}

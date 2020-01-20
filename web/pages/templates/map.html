@@ -25,15 +25,15 @@
 
   function map_init(map, options){
     $(document).ready(function () { 
-      create_tile_layer(map, options); 
-      get_points(map, options);
+      create_tile_layer(map); 
+      get_points(map);
+    });
+    map.on('moveend', function() {
+      get_points(this);
     });
   }
 
-  map.on('zoomend', get_points(map));
-
-  function create_tile_layer(map, options) {
-    // Add tile layer to map
+  function create_tile_layer(map) {
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -43,40 +43,90 @@
   }
 
   function get_points(map) {
-    var bottom_left = map.getBounds().getSouthWest();
-    var top_right = map.getBounds().getNorthEast();
+    var minlat=0, maxlat=0, minlong=0, maxlong=0;
+    minlat = map.getBounds().getSouth();
+    maxlat = map.getBounds().getNorth();
+    minlong = map.getBounds().getWest();
+    maxlong = map.getBounds().getEast();
+
     $.ajax({
       type:"GET",
-      url: "points",
-      data:{south_west: bottom_left, north_east: top_right},
-      success: render_points(map, sites)
+      url: "{% url 'points' %}",
+      contentType: "application/json",
+      data: {
+        json_data : JSON.stringify({
+          'min_lat': minlat, 
+          'max_lat': maxlat, 
+          'min_long': minlong, 
+          'max_long': maxlong
+        })
+      },
+      success: function(data) {
+        data = JSON.parse(data.geos);
+        render_points(map, data);
+      }
     })
   }
 
-  function render_points(map, site_list) {
+  function render_points(map, geo_list) {
     // Renderer for plotting points on canvas
     var myRenderer = L.canvas({ padding: 0.25 });
+    var entity
 
-    {% for site in site_list %}
+    for (var i = 0; i < geo_list.length; i++) {
+      var geo = geo_list[i]
 
-    // site.latitude and site.longitude need to be replaced with accesses to the geocode table
-    var siteMarker = L.circleMarker(["{{ site.latitude }}", "{{ site.longitude }}"], {
-      renderer: myRenderer,
-      radius: 3.0,
-      fillOpacity: 1.0,
-      color: '#820000'
-    }).addTo(map).bindPopup("<a href={% url 'site_details' site.id %}>{{ site.name|title }}</a>")
-    .on('mouseover', function(e){
-      this.openPopup();
-    })
-    .on('click', function(e){
-      this.openPopup();
-    })
-    .on('dblclick', function(e){
-      window.open('{% url "site_details" site.id %}')
-    })
+      if(entityType == 'SITE') {
+        $.ajax({
+          type:"GET",
+          url: "{% url 'get_site' %}",
+          contentType: "application/json",
+          data: {geo_id: geo.pk },
+          success: function(data) {
+            entity = JSON.parse(data.site);
+              addPopup(entity[0]);
+          }
+        })
+      } else if (entityType == 'SPONSOR') {
+        $.ajax({
+          type:"GET",
+          url: "{% url 'get_sponsor' %}",
+          contentType: "application/json",
+          data: {geo_id: geo.pk },
+          success: function(data) {
+            entity = JSON.parse(data.sponsor);
+              addPopup(entity[0]);
+          }
+        })
+      }
 
-    {% endfor %}
+      function addPopup(entity) {
+        if(entity) {
+          var url;
+          if(entityType == "SITE") {
+            url = "/sitedetails";
+          } else if(entityType == "SPONSOR") {
+            url = "/sponsordetails";
+          }
+          var popupText = "<a href='" + url + "/" + entity.pk + "'/>" + entity.fields.name + "</a>";
+          var siteMarker = L.circleMarker([geo.fields.latitude, geo.fields.longitude], {
+            renderer: myRenderer,
+            radius: 3.0,
+            fillOpacity: 1.0,
+            color: '#820000'
+          }).addTo(map).bindPopup(popupText)
+          .on('mouseover', function(e){
+            this.openPopup();
+          })
+          .on('click', function(e){
+            this.openPopup();
+          })
+          .on('dblclick', function(e){
+            window.open('{% url "site_details" 1 %}')
+          })
+      }
+    }
+    }
   }
 </script> 
 
