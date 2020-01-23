@@ -142,7 +142,7 @@ def update_database(json_data, program_type):
 def populate():
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
     headers = {'X-App-Token': app_token}
-    max_records = 50000
+    max_records = 10
     sso_portal = "3hpz-ajxk"
     sfsp_portal = "rmea-7b2m"
 
