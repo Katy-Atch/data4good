@@ -34,17 +34,22 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
 
     r = requests.get(
         'http://dev.virtualearth.net/REST/v1/Locations',
-        params={'q': street_address1 + ' ' + street_address2 + ' ' + street_city + ' ' + street_state + ' ' + str(street_zip),
+        params={'q': street_address1 + ' ' + str(street_address2) + ' ' + street_city + ' ' + street_state + ' ' + str(street_zip),
                 'key': BingMapsAPIKey})
     data = r.json()
 
     latitude = 0
     longitude = 0
-    # Checking if there exists a lat/long for the given location
-    if data['resourceSets'][0]['estimatedTotal'] > 0:
-        coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
-        latitude = coordinates[LATITUDE]
-        longitude = coordinates[LONGITUDE]
+    valid_coordinates = FALSE
+
+    try:
+        # Checking if there exists a lat/long for the given location
+        if data['resourceSets'][0]['estimatedTotal'] > 0:
+            coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
+            latitude = coordinates[LATITUDE]
+            longitude = coordinates[LONGITUDE]
+    except:
+
 
     geo_object = GEO.objects.filter(geo_id=geo_id).first()
     geo_object.latitude = latitude
