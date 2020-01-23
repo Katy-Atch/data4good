@@ -1,44 +1,35 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from phone_field import PhoneField
 
-# test blah
-
-# Create your models here.
 class Site(models.Model):
-    # Still need unique identifier for sites
 
     # Defined by myself
     most_current_record = models.BooleanField(default=True)
-    last_updated = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
-    # SSO or SFSP site
+    # SSO or SFSP entity
     SSO = 'SSO'
     SFSP = 'SFSP'
-    OTHER = 'OTHER' 
-
+    OTHER = 'OTHER'
     program_choices = (
         (SSO, 'Seamless Summer Option'),
         (SFSP, 'Summer Food Service Program'),
-        (OTHER, 'Other'),
+        (OTHER, 'Other')
     )
+
     sso_or_sfsp = models.CharField(
-        max_length=20,
+        max_length=255,
         choices=program_choices,
         default=OTHER,
     )
     # End defined by myself
 
     # Fetch from data portal
-    program_year = models.CharField(max_length=500, null=True, blank=True)
+    program_year = models.CharField(max_length=255)
     site_id = models.IntegerField()
-    ce_id = models.IntegerField(null=True, blank=True)
+    ce_id = models.IntegerField()
     geo_id = models.IntegerField(null=True, blank=True)
-    # ce_id = models.ForeignKey(
-    #     'CE',
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     blank=True,
-    # )
 
     # Type of SNP org- for SSO only
     CHARTER = 'CHARTER'
@@ -54,7 +45,7 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     type_of_snp_org = models.CharField(
-        max_length=100,
+        max_length=255,
         choices=snp_org_choices,
         default=OTHER,
         null=True,
@@ -77,15 +68,15 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     type_of_sfsp_org = models.CharField(
-        max_length=100,
+        max_length=255,
         choices=sfsp_org_choices,
         default=OTHER,
         null=True,
         blank=True,
     )
 
-    name = models.CharField(max_length=500)
-    county = models.CharField(max_length=500)
+    name = models.CharField(max_length=255)
+    county = models.CharField(max_length=255)
 
     # Rural or Urban
     RURAL = 'RURAL'
@@ -95,7 +86,7 @@ class Site(models.Model):
         (URBAN, 'Urban'),
     )
     rural_or_urban_code = models.CharField(
-        max_length=20,
+        max_length=255,
         choices=rural_urban_choices,
         null=True,
         blank=True,
@@ -115,7 +106,7 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     sso_site_type = models.CharField(
-        max_length=20,
+        max_length=255,
         choices=sso_site_type_choices,
         default=OTHER,
         null=True,
@@ -141,55 +132,55 @@ class Site(models.Model):
         (OTHER, 'Other'),
     )
     sfsp_site_type = models.CharField(
-        max_length=100,
+        max_length=255,
         choices=sfsp_site_type_choices,
         default=OTHER,
         null=True,
         blank=True,
     )
 
-    street_address1 = models.CharField(max_length=500)
-    street_address2 = models.CharField(max_length=500, null=True, blank=True)
-    street_city = models.CharField(max_length=500)
-    street_state = models.CharField(max_length=500)
-    street_zip = models.CharField(max_length=500)
+    street_address1 = models.CharField(max_length=255)
+    street_address2 = models.CharField(max_length=255, null=True, blank=True)
+    street_city = models.CharField(max_length=255)
+    street_state = models.CharField(max_length=255)
+    street_zip = models.CharField(max_length=255)
 
-    program_contact_salutation = models.CharField(max_length=500, null=True, blank=True)
-    program_contact_first_name = models.CharField(max_length=500)
-    program_contact_last_name = models.CharField(max_length=500)
-    program_contact_title_position = models.CharField(max_length=500)
-    program_contact_email = models.EmailField()
+    program_contact_salutation = models.CharField(max_length=255, null=True, blank=True)
+    program_contact_first_name = models.CharField(max_length=255)
+    program_contact_last_name = models.CharField(max_length=255)
+    program_contact_title_position = models.CharField(max_length=255)
+    program_contact_email = models.EmailField(null=True, blank=True)
     program_contact_phone = PhoneField(null=False, blank=True)
 
-    site_supervisor_salutation = models.CharField(max_length=500, null=True, blank=True)
-    site_supervisor_first_name = models.CharField(max_length=500, null=True, blank=True)
-    site_supervisor_last_name = models.CharField(max_length=500, null=True, blank=True)
-    site_supervisor_title_position = models.CharField(max_length=500, null=True, blank=True)
+    site_supervisor_salutation = models.CharField(max_length=255, null=True, blank=True)
+    site_supervisor_first_name = models.CharField(max_length=255, null=True, blank=True)
+    site_supervisor_last_name = models.CharField(max_length=255, null=True, blank=True)
+    site_supervisor_title_position = models.CharField(max_length=255, null=True, blank=True)
     site_supervisor_email = models.EmailField(null=True, blank=True)
     site_supervisor_phone = PhoneField(null=True, blank=True)
 
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    days_of_operation = models.CharField(max_length=500)
-    meal_types_served = models.CharField(max_length=500)
+    days_of_operation = models.CharField(max_length=255)
+    meal_types_served = models.CharField(max_length=255)
 
-    primary_auth_rep_salutation = models.CharField(max_length=500, null=True, blank=True)
-    primary_auth_rep_first_name = models.CharField(max_length=500, null=True, blank=True)
-    primary_auth_rep_last_name = models.CharField(max_length=500, null=True, blank=True)
-    primary_auth_rep_title_position = models.CharField(max_length=500, null=True, blank=True)
+    primary_auth_rep_salutation = models.CharField(max_length=255, null=True, blank=True)
+    primary_auth_rep_first_name = models.CharField(max_length=255, null=True, blank=True)
+    primary_auth_rep_last_name = models.CharField(max_length=255, null=True, blank=True)
+    primary_auth_rep_title_position = models.CharField(max_length=255, null=True, blank=True)
     primary_auth_rep_email = models.EmailField(null=True, blank=True)
     primary_auth_rep_phone = PhoneField(null=True, blank=True)
 
-    breakfast_time = models.CharField(max_length=20, null=True, blank=True)
-    amsnack_time = models.CharField(max_length=20, null=True, blank=True)
-    lunch_time = models.CharField(max_length=20, null=True, blank=True)
-    pmsnack_time = models.CharField(max_length=20, null=True, blank=True)
-    supper_time = models.CharField(max_length=20, null=True, blank=True)
-    breakfast_days_served = models.CharField(max_length=30, null=True, blank=True)
-    amsnack_days_served = models.CharField(max_length=30, null=True, blank=True)
-    lunch_days_served = models.CharField(max_length=30, null=True, blank=True)
-    pmsnack_days_served = models.CharField(max_length=30, null=True, blank=True)
-    supper_days_served = models.CharField(max_length=30, null=True, blank=True)
+    breakfast_time = models.CharField(max_length=255, null=True, blank=True)
+    amsnack_time = models.CharField(max_length=255, null=True, blank=True)
+    lunch_time = models.CharField(max_length=255, null=True, blank=True)
+    pmsnack_time = models.CharField(max_length=255, null=True, blank=True)
+    supper_time = models.CharField(max_length=255, null=True, blank=True)
+    breakfast_days_served = models.CharField(max_length=255, null=True, blank=True)
+    amsnack_days_served = models.CharField(max_length=255, null=True, blank=True)
+    lunch_days_served = models.CharField(max_length=255, null=True, blank=True)
+    pmsnack_days_served = models.CharField(max_length=255, null=True, blank=True)
+    supper_days_served = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -199,15 +190,15 @@ class CE(models.Model):
 
     # Defined by myself
     most_current_record = models.BooleanField(default=True)
-    last_updated = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     # End defined by myself
 
     # Unique identifier
-    ce_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=500)
-    county = models.CharField(max_length=500)
-    program_year = models.CharField(max_length=500, null=True, blank=True)
-    ce_status = models.CharField(max_length=20, null=True, blank=True)
+    ce_id = models.IntegerField() # NOT primary key- will have multiple rows for the same CE
+    name = models.CharField(max_length=255)
+    county = models.CharField(max_length=255)
+    program_year = models.CharField(max_length=255)
+    ce_status = models.CharField(max_length=255, null=True, blank=True)
 
     geo_id = models.IntegerField(null=True, blank=True)
 
@@ -227,31 +218,31 @@ class CE(models.Model):
     )
 
     type_of_agency = models.CharField(
-        max_length=100,
+        max_length=255,
         choices=agency_type_choices,
         default=OTHER,
     )
 
-    county_district_code = models.CharField(max_length=500, null=True, blank=True)
+    county_district_code = models.CharField(max_length=255, null=True, blank=True)
     esc = models.IntegerField()
     tda_region = models.IntegerField()
-    street_address1 = models.CharField(max_length=500)
-    street_address2 = models.CharField(max_length=500, null=True, blank=True)
-    street_city = models.CharField(max_length=500)
-    street_state = models.CharField(max_length=500)
-    street_zip = models.CharField(max_length=500)
+    street_address1 = models.CharField(max_length=255)
+    street_address2 = models.CharField(max_length=255, null=True, blank=True)
+    street_city = models.CharField(max_length=255)
+    street_state = models.CharField(max_length=255)
+    street_zip = models.CharField(max_length=255)
 
-    superintendent_salutation = models.CharField(max_length=500, null=True, blank=True)
-    superintendent_first_name = models.CharField(max_length=500, null=True, blank=True)
-    superintendent_last_name = models.CharField(max_length=500, null=True, blank=True)
-    superintendent_title_position = models.CharField(max_length=150000, null=True, blank=True)
+    superintendent_salutation = models.CharField(max_length=255, null=True, blank=True)
+    superintendent_first_name = models.CharField(max_length=255, null=True, blank=True)
+    superintendent_last_name = models.CharField(max_length=255, null=True, blank=True)
+    superintendent_title_position = models.CharField(max_length=255, null=True, blank=True)
     superintendent_email = models.EmailField(null=True, blank=True)
     superintendent_phone = PhoneField(blank=True, null=True)
 
-    childnutdir_salutation = models.CharField(max_length=500, null=True, blank=True)
-    childnutdir_first_name = models.CharField(max_length=500, null=True, blank=True)
-    childnutdir_last_name = models.CharField(max_length=500, null=True, blank=True)
-    childnutdir_title_position = models.CharField(max_length=500, null=True, blank=True)
+    childnutdir_salutation = models.CharField(max_length=255, null=True, blank=True)
+    childnutdir_first_name = models.CharField(max_length=255, null=True, blank=True)
+    childnutdir_last_name = models.CharField(max_length=255, null=True, blank=True)
+    childnutdir_title_position = models.CharField(max_length=255, null=True, blank=True)
     childnutdir_email = models.EmailField(null=True, blank=True)
     childnutdir_phone = PhoneField(null=True, blank=True)
 
@@ -262,11 +253,11 @@ class GEO(models.Model):
 
     geo_id = models.AutoField(primary_key=True)
 
-    street_address1 = models.CharField(max_length=500)
-    street_address2 = models.CharField(max_length=500, null=True, blank=True)
-    street_city = models.CharField(max_length=500)
-    street_state = models.CharField(max_length=500)
-    street_zip = models.CharField(max_length=500)
+    street_address1 = models.CharField(max_length=255)
+    street_address2 = models.CharField(max_length=255, null=True, blank=True)
+    street_city = models.CharField(max_length=255)
+    street_state = models.CharField(max_length=255)
+    street_zip = models.CharField(max_length=255)
     
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)

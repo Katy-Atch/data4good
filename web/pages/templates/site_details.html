@@ -19,27 +19,27 @@
 <h3>{{ site.name|title }}</h3>
 <br>
 <div class="row">
-  {% if site.breakfast_days_served != null or site.breakfast_time != null %}
+  {% if site.breakfast_days_served != 'None' or site.breakfast_time != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <p><strong>Breakfast</strong>: {{ site.breakfast_days_served }}, {{ site.breakfast_time }}</p>
   </div>
   {% endif %}
-  {% if site.amsnack_days_served != null or site.amsnack_time != null %}
+  {% if site.amsnack_days_served != 'None' or site.amsnack_time != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <p><strong>Morning Snack</strong>: {{ site.amsnack_days_served }}, {{ site.amsnack_time }}</p>
   </div>
   {% endif %}
-  {% if site.lunch_days_served != null or site.lunch_time != null %}
+  {% if site.lunch_days_served != 'None' or site.lunch_time != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <p><strong>Lunch</strong>: {{ site.lunch_days_served }}, {{ site.lunch_time }}</p>
   </div>
   {% endif %}
-  {% if site.pmsnack_days_served != null or site.pmsnack_time != null %}
+  {% if site.pmsnack_days_served != 'None' or site.pmsnack_time != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <p><strong>Afternoon Snack</strong>: {{ site.pmsnack_days_served }}, {{ site.pmsnack_time }}</p>
   </div>
   {% endif %}
-  {% if site.supper_days_served != null or site.supper_time != null %}
+  {% if site.supper_days_served != 'None' or site.supper_time != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <p><strong>Supper</strong>: {{ site.supper_days_served }}, {{ site.supper_time }}</p>
   </div>
@@ -57,17 +57,19 @@
 <br>
 <h6 class="d-inline">Address: </h6>
 <p class="d-inline">{{ site.street_address1|title }}
-{% if site.street_address2 != null %}
+{% if site.street_address2 != 'None' %}
 {{ site.street_address2|title }}
 {% endif %} 
 {{ site.street_city|title }}, {{ site.street_state }} {{ site.street_zip }}</p>
 <br><br> 
 <div class="row">
-  {% if site.program_contact_salutation != null or site.program_contact_first_name != null or site.program_contact_last_name != null %}
+  {% if site.program_contact_first_name != 'None' and site.program_contact_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Program Contact</h6>
     <p class="mb-0">
+      {% if site.program_contact_salutation != 'None' %}
       {{ site.program_contact_salutation}}
+      {% endif %}
       {{ site.program_contact_first_name }}
       {{ site.program_contact_last_name }}
     </p>
@@ -77,24 +79,34 @@
     
   </div>
   {% endif %}
-  {% if site.site_supervisor_salutation != null or site.site_supervisor_first_name != null or site.site_supervisor_last_name != null %}
+  {% if site.site_supervisor_first_name != 'None' and site.site_supervisor_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Site Supervisor</h6>
-    <p>
+    <p class="mb-0">
+      {% if site.site_supervisor_salutation != 'None' %}
       {{ site.site_supervisor_salutation }}
+      {% endif %}
       {{ site.site_supervisor_first_name }}
       {{ site.site_supervisor_last_name }}
     </p>
+    <p class="mb-0"><i>{{ site.site_supervisor_title_position }}</i></p>
+    <p class="mb-0">{{ site.site_supervisor_email }}</p>
+    <p class="mb-0">{{ site.site_supervisor_phone }}</p>
   </div>
   {% endif %}
-  {% if site.primary_auth_rep_salutation != null or site.primary_auth_rep_first_name != null or site.primary_auth_rep_last_name != null %}
+  {% if site.primary_auth_rep_first_name != 'None' and site.primary_auth_rep_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
     <h6>Primary Authorized Representative</h6>
-    <p>
+    <p class="mb-0">
+      {% if site.primary_auth_rep_salutation != 'None' %}
       {{ site.primary_auth_rep_salutation }}
+      {% endif %}
       {{ site.primary_auth_rep_first_name }}
       {{ site.primary_auth_rep_last_name }}
     </p>
+    <p class="mb-0"><i>{{ site.primary_auth_rep_position }}</i></p>
+    <p class="mb-0">{{ site.primary_auth_rep_email }}</p>
+    <p class="mb-0">{{ site.primary_auth_rep_phone }}</p>
   </div>
   {% endif %}
 </div>
