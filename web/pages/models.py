@@ -191,10 +191,26 @@ class CE(models.Model):
     # Defined by myself
     most_current_record = models.BooleanField(default=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    # SSO or SFSP entity
+    SSO = 'SSO'
+    SFSP = 'SFSP'
+    OTHER = 'OTHER'
+    program_choices = (
+        (SSO, 'Seamless Summer Option'),
+        (SFSP, 'Summer Food Service Program'),
+        (OTHER, 'Other')
+    )
+
+    sso_or_sfsp = models.CharField(
+        max_length=255,
+        choices=program_choices,
+        default=OTHER,
+    )
     # End defined by myself
 
     # Unique identifier
-    ce_id = models.IntegerField() # NOT primary key- will have multiple rows for the same CE
+    ce_id = models.IntegerField()
     name = models.CharField(max_length=255)
     county = models.CharField(max_length=255)
     program_year = models.CharField(max_length=255)
