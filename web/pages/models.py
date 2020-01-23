@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.contrib import admin
 from phone_field import PhoneField
 
 class Site(models.Model):
@@ -280,3 +280,13 @@ class GEO(models.Model):
 
     valid_coordinates = models.BooleanField(default=True)
 
+class SiteAdmin(admin.ModelAdmin):
+    readonly_fields = ('last_updated',)
+    list_display = ('name', 'last_updated') 
+
+class CEAdmin(admin.ModelAdmin):
+    readonly_fields = ('last_updated',)
+    list_display = ('name', 'last_updated') 
+
+class GEOAdmin(admin.ModelAdmin):
+    list_display = ('street_address1', 'geo_id')
