@@ -40,20 +40,27 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
 
     latitude = 0
     longitude = 0
-    valid_coordinates = FALSE
+    # Will be changed to false if an error occurs during geocoding
+    valid_coordinates = True
+
 
     try:
         # Checking if there exists a lat/long for the given location
         if data['resourceSets'][0]['estimatedTotal'] > 0:
+            # Extract point representing coordinates
             coordinates = data['resourceSets'][0]['resources'][0]['point']['coordinates']
             latitude = coordinates[LATITUDE]
             longitude = coordinates[LONGITUDE]
     except:
+        # If an error occurred during geocoding, change  valid_coordinates 
+        # field of geo object to False
+        valid_coordinates = False
 
 
     geo_object = GEO.objects.filter(geo_id=geo_id).first()
     geo_object.latitude = latitude
     geo_object.longitude = longitude
+    geo_object.valid_coordinates = valid_coordinates
     geo_object.save()
 
 

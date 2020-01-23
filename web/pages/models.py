@@ -262,3 +262,5 @@ class GEO(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
+    valid_coordinates = models.BooleanField(default=True)
+
