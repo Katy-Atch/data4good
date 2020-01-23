@@ -34,7 +34,7 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
 
     r = requests.get(
         'http://dev.virtualearth.net/REST/v1/Locations',
-        params={'q': street_address1 + ' ' + street_address2 + ' ' + street_city + ' ' + street_state + ' ' + str(street_zip),
+        params={'q': street_address1 + ' ' + str(street_address2) + ' ' + street_city + ' ' + street_state + ' ' + str(street_zip),
                 'key': BingMapsAPIKey})
     data = r.json()
 
