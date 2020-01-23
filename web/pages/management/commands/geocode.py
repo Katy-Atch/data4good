@@ -8,6 +8,7 @@ from mapping import Mapping, GeoAttributes
 
 LATITUDE = 0
 LONGITUDE = 1
+BingMapsAPIKey = 'Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c'
 
 # Control flow of the script
 
@@ -31,11 +32,10 @@ LONGITUDE = 1
 
 def geocode_address(geo_id, street_address1, street_address2, street_city, street_state, street_zip):
 
-    BingMapsAPIKey = 'Ao5wMyg0cjJUxELJFM2NpmRaX9zWtatIPpDW01SprBbnJofurOjUL3dSV1p3o82c'
-    URL = 'http://dev.virtualearth.net/REST/v1/Locations?q={0}%20{1}%20{2}%20{3}%20{4}&key={5}'.format(street_address1, 
-    street_address2, street_city, street_state, street_zip, BingMapsAPIKey)
-    # TODO: Change URL building, look at populate() method for example
-    r = requests.get(URL)
+    r = requests.get(
+        'http://dev.virtualearth.net/REST/v1/Locations',
+        params={'q': street_address1 + ' ' + street_address2 + ' ' + street_city + ' ' + street_state + ' ' + str(street_zip),
+                'key': BingMapsAPIKey})
     data = r.json()
 
     latitude = 0
@@ -50,7 +50,7 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     geo_object.latitude = latitude
     geo_object.longitude = longitude
     geo_object.save()
-    
+
 
 def create_geocode_object(street_address1, street_address2, street_city, street_state, 
                           street_zip,latitude, longitude):
@@ -61,6 +61,9 @@ def create_geocode_object(street_address1, street_address2, street_city, street_
 
     new_geo_object.save()
     return new_geo_object.geo_id
+
+
+
 
 def assign_geo_values(new_geo_object, street_address1, 
     street_address2, street_city, street_state, 
@@ -76,6 +79,38 @@ def assign_geo_values(new_geo_object, street_address1,
 
 class Command(BaseCommand):
     help = "Geocodes addresses"
-
+    
     def handle(self, *args, **options):
+        # geo_objects = [{'geo_id': 0,
+        # 'street_address1': '2733 Rosedale ave', 
+        # 'street_address2': '',
+        # 'street_city': 'Dallas',
+        # 'street_state': 'TX',
+        # 'street_zip': 75205,
+        # 'latitude': 0,
+        # 'longitude': 0}]
+        # batch_geocode(geo_objects)
         geocode_address(0, '2733 Rosedale Ave', '', 'Dallas', 'TX', 75205)
+
+
+# def batch_geocode(geo_objects):
+#     data = create_geocode_input_data(geo_objects)
+#     create_job = requests.post(url='http://spatial.virtualearth.net/REST/v1/Dataflows/Geocode',
+#                     data=data, params={'input': 'pipe', 'output': 'json','key': BingMapsAPIKey})
+#     job_response = create_job.json()
+#     print('hey')
+
+# def create_geocode_input_data(geo_objects):
+#     data = 'Bing Spatial Data Services, 2.0\n'
+#     data += 'Id| GeocodeRequest/Address/AddressLine| GeocodeRequest/Address/Locality| GeocodeRequest/Address/AdminDistrict| GeocodeRequest/Address/PostalCode| GeocodeResponse/Point/Latitude| GeocodeResponse/Point/Longitude\n'
+#     for geo_object in geo_objects:
+#         data += str(geo_object['geo_id']) + '| '
+#         for location_attribute in GeoAttributes.location_attributes:
+#             # data += getattr(geo_object, location_attribute)
+#             data += str(geo_object[location_attribute])
+#             if location_attribute == 'street_address1':
+#                 data += ' '
+#             else:
+#                 data += '| '
+#         data += '0|0'
+#     return data
