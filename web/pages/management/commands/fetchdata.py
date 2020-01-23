@@ -61,6 +61,11 @@ def save_entity(program, entity, row, geo_id):
     setattr(new_object, "last_updated", datetime.now())
     setattr(new_object, "geo_id", geo_id)
 
+    if program==Program.SFSP:
+        setattr(new_object, "sso_or_sfsp", "SFSP")
+    elif program==Program.SSO:
+        setattr(new_object, "sso_or_sfsp", "SSO")
+
     new_object.save()
 
 
