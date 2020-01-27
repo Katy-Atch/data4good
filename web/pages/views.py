@@ -16,9 +16,11 @@ def sponsor(request):
 
 def get_site(request):
     geo_id = request.GET.get('geo_id')
-    site = Site.objects.filter(geo_id=geo_id)[:1]
+    site = Site.objects.filter(geo_id=geo_id, most_current_record=True)[:1]
     site_to_return = serialize('json', site)
-    return JsonResponse({'site': site_to_return})
+    geo = GEO.objects.filter(geo_id=geo_id)
+    geo_to_return = serialize('json', geo)
+    return JsonResponse({'site': site_to_return, 'geo': geo_to_return})
 
 def get_sponsor(request):
     geo_id = request.GET.get('geo_id')
@@ -65,9 +67,10 @@ def get_geos(min_lat, max_lat, min_long, max_long):
     geo_list = GEO.objects.all()
     geos_to_render = list()
     for geo in geo_list:
-        if geo.latitude != None and geo.longitude != None:
-            if geo.latitude >= min_lat and geo.latitude <= max_lat \
-                and geo.longitude >= min_long and geo.longitude <= max_long:
-                geos_to_render.append(geo)
+        geos_to_render.append(geo)
+    #     if geo.latitude != None and geo.longitude != None:
+    #         if geo.latitude >= min_lat and geo.latitude <= max_lat \
+    #             and geo.longitude >= min_long and geo.longitude <= max_long:
+    #             geos_to_render.append(geo)
 
     return geos_to_render
