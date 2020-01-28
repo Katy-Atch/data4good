@@ -48,10 +48,6 @@
     maxlat = map.getBounds().getNorth();
     minlong = map.getBounds().getWest();
     maxlong = map.getBounds().getEast();
-    // console.log(minlat)
-    // console.log(maxlat)
-    // console.log(minlong)
-    // console.log(maxlong)
 
     $.ajax({
       type:"GET",
@@ -62,7 +58,8 @@
           'min_lat': minlat, 
           'max_lat': maxlat, 
           'min_long': minlong, 
-          'max_long': maxlong
+          'max_long': maxlong,
+          'entityType': entityType
         })
       },
       success: function(data) {
@@ -76,42 +73,36 @@
     // Renderer for plotting points on canvas
     var myRenderer = L.canvas({ padding: 0.25 });
     var entity
-    // console.log("Geo list")
-    // console.log(geo_list)
 
     for (var i = 0; i < geo_list.length; i++) {
       var geo = geo_list[i]
-      // console.log(geo);
 
       if(entityType == 'SITE') {
         $.ajax({
           type:"GET",
           url: "{% url 'get_site' %}",
           contentType: "application/json",
-          data: {geo_id: geo.pk },
+          data: {geo_id: geo.pk},
           success: function(data) {
             entity = JSON.parse(data.site);
             geo_obj = JSON.parse(data.geo)
             addPopup(entity[0], geo_obj[0]);
           }
         })
-      // } else if (entityType == 'SPONSOR') {
-      //   $.ajax({
-      //     type:"GET",
-      //     url: "{% url 'get_sponsor' %}",
-      //     contentType: "application/json",
-      //     data: {geo_id: geo.pk },
-      //     success: function(data) {
-      //       entity = JSON.parse(data.sponsor);
-      //       // console.log(entity)
-      //       addPopup(entity[0], geo);
-      //     }
-      //   })
+      } else if (entityType == 'SPONSOR') {
+        $.ajax({
+          type:"GET",
+          url: "{% url 'get_sponsor' %}",
+          contentType: "application/json",
+          data: {geo_id: geo.pk},
+          success: function(data) {
+            entity = JSON.parse(data.sponsor);
+            addPopup(entity[0], geo);
+          }
+        })
       }
 
       function addPopup(entity, geo_obj) {
-        // console.log("Inside addPopup()")
-        console.log(geo_obj)
         if(entity) {
           var url;
           if(entityType == "SITE") {

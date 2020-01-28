@@ -54,8 +54,9 @@ def points(request):
         max_lat = data_dict['max_lat']
         min_long = data_dict['min_long']
         max_long = data_dict['max_long']
+        entityType = data_dict['entityType']
 
-        geo_list = get_geos(min_lat, max_lat, min_long, max_long)
+        geo_list = get_geos(min_lat, max_lat, min_long, max_long, entityType)
     
         geos = serialize('json', geo_list)
         return JsonResponse({'result': 'success', 'geos': geos})
@@ -63,14 +64,16 @@ def points(request):
         return JsonResponse({'result': 'unsuccessful'})
 
 
-def get_geos(min_lat, max_lat, min_long, max_long):
+def get_geos(min_lat, max_lat, min_long, max_long, entityType):
     geo_list = GEO.objects.all()
     geos_to_render = list()
     for geo in geo_list:
-        geos_to_render.append(geo)
-    #     if geo.latitude != None and geo.longitude != None:
-    #         if geo.latitude >= min_lat and geo.latitude <= max_lat \
-    #             and geo.longitude >= min_long and geo.longitude <= max_long:
-    #             geos_to_render.append(geo)
+        if geo.latitude != None and geo.longitude != None:
+            if geo.latitude >= min_lat and geo.latitude <= max_lat \
+                and geo.longitude >= min_long and geo.longitude <= max_long:
+                if entityType == 'SITE' and Site.objects.filter(geo_id=geo.pk)
+                    geos_to_render.append(geo)
+                elif entityType == 'SPONSOR' and CE.objects.filter(geo_id=geo.pk)
+                    geos_to_render.append(geo)
 
     return geos_to_render
