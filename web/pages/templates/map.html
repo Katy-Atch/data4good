@@ -97,7 +97,8 @@
           data: {geo_id: geo.pk},
           success: function(data) {
             entity = JSON.parse(data.sponsor);
-            addPopup(entity[0], geo);
+            geo_obj = JSON.parse(data.geo)
+            addPopup(entity[0], geo_obj[0]);
           }
         })
       }
