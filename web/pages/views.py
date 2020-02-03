@@ -26,7 +26,9 @@ def get_sponsor(request):
     geo_id = request.GET.get('geo_id')
     sponsor = CE.objects.filter(geo_id=geo_id)[:1]
     sponsor_to_return = serialize('json', sponsor)
-    return JsonResponse({'sponsor': sponsor_to_return})
+    geo = GEO.objects.filter(geo_id=geo_id)
+    geo_to_return = serialize('json', geo)
+    return JsonResponse({'sponsor': sponsor_to_return, 'geo': geo_to_return})
 
 def get_geo(request):
     geo_id = request.GET.get('geo_id')
@@ -71,9 +73,9 @@ def get_geos(min_lat, max_lat, min_long, max_long, entityType):
         if geo.latitude != None and geo.longitude != None:
             if geo.latitude >= min_lat and geo.latitude <= max_lat \
                 and geo.longitude >= min_long and geo.longitude <= max_long:
-                if entityType == 'SITE' and Site.objects.filter(geo_id=geo.pk)
+                if entityType == 'SITE' and Site.objects.filter(geo_id=geo.pk):
                     geos_to_render.append(geo)
-                elif entityType == 'SPONSOR' and CE.objects.filter(geo_id=geo.pk)
+                elif entityType == 'SPONSOR' and CE.objects.filter(geo_id=geo.pk):
                     geos_to_render.append(geo)
 
     return geos_to_render

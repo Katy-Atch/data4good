@@ -25,7 +25,7 @@ SECRET_KEY = 'isi0=gix)^2y-_oq1$1kcv@^)907t&n_4n(uel_onvw%wzv2o6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -123,7 +123,9 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/code/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (32.7767, -96.7970),
