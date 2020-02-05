@@ -63,11 +63,11 @@
 {{ site.street_city|title }}, {{ site.street_state }} {{ site.street_zip }}</p>
 <br><br> 
 <div class="row">
-  {% if site.program_contact_first_name != 'None' and site.program_contact_last_name != 'None' %}
+  {% if site.program_contact_first_name != None and site.program_contact_last_name != None and site.program_contact_first_name != 'None' and site.program_contact_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
     <h6>Program Contact</h6>
     <p class="mb-0">
-      {% if site.program_contact_salutation != 'None' %}
+      {% if site.program_contact_salutation != None and site.program_contact_salutation != 'None' %}
       {{ site.program_contact_salutation}}
       {% endif %}
       {{ site.program_contact_first_name }}
@@ -79,35 +79,47 @@
     <br>
   </div>
   {% endif %}
-  {% if site.site_supervisor_first_name != 'None' and site.site_supervisor_last_name != 'None' %}
+  {% if site.site_supervisor_first_name != None and site.site_supervisor_last_name != None and site.site_supervisor_first_name != 'None' and site.site_supervisor_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
     <h6>Site Supervisor</h6>
     <p class="mb-0">
-      {% if site.site_supervisor_salutation != 'None' %}
+      {% if site.site_supervisor_salutation != None and site.site_supervisor_salutation != 'None' %}
       {{ site.site_supervisor_salutation }}
       {% endif %}
       {{ site.site_supervisor_first_name }}
       {{ site.site_supervisor_last_name }}
     </p>
+    {% if site.site_supervisor_title_position != None and site.site_supervisor_title_position != 'None' %}
     <p class="mb-0"><i>{{ site.site_supervisor_title_position }}</i></p>
+    {% endif %}
+    {% if site.site_supervisor_email != None and site.site_supervisor_email != 'None' %}
     <p class="mb-0">{{ site.site_supervisor_email }}</p>
+    {% endif %}
+    {% if site.site_supervisor_phone != None and site.site_supervisor_phone != 'None' %}
     <p class="mb-0">{{ site.site_supervisor_phone }}</p>
+    {% endif %}
     <br>
   </div>
   {% endif %}
-  {% if site.primary_auth_rep_first_name != 'None' and site.primary_auth_rep_last_name != 'None' %}
+  {% if site.primary_auth_rep_first_name != None and site.primary_auth_rep_last_name != None and site.primary_auth_rep_first_name != 'None' and site.primary_auth_rep_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
     <h6>Primary Authorized Representative</h6>
     <p class="mb-0">
-      {% if site.primary_auth_rep_salutation != 'None' %}
+      {% if site.primary_auth_rep_salutation != None and site.primary_auth_rep_salutation != 'None' %}
       {{ site.primary_auth_rep_salutation }}
       {% endif %}
       {{ site.primary_auth_rep_first_name }}
       {{ site.primary_auth_rep_last_name }}
     </p>
-    <p class="mb-0"><i>{{ site.primary_auth_rep_position }}</i></p>
+    {% if site.primary_auth_rep_title_position != None and site.primary_auth_rep_title_position != 'None' %}
+    <p class="mb-0"><i>{{ site.primary_auth_rep_title_position }}</i></p>
+    {% endif %}
+    {% if site.primary_auth_rep_email != None and site.primary_auth_rep_email != 'None' %}
     <p class="mb-0">{{ site.primary_auth_rep_email }}</p>
+    {% endif %}
+    {% if site.primary_auth_rep_phone != None and site.primary_auth_rep_phone != 'None' %}
     <p class="mb-0">{{ site.primary_auth_rep_phone }}</p>
+    {% endif %}
     <br>
   </div>
   {% endif %}

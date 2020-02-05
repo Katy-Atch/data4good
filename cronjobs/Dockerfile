@@ -5,6 +5,10 @@ ENV srvdir /cronjobs
 
 RUN mkdir -p ${srvdir}
 WORKDIR ${srvdir}
+
+COPY requirements.txt ${srvdir}
+RUN pip3 install -r requirements.txt
+
 COPY . ${srvdir}
 
 RUN apt-get update && apt-get -y install cron

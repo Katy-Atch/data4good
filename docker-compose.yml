@@ -8,20 +8,25 @@ services:
     depends_on:
       - db
     build: ./web
-    ports:
-      - 8000:8000
     volumes:
       - ./web:/code
+      - ./static:/static
+    expose:
+      - "8000"
 
   cronjobs:
     build: ./cronjobs
+    volumes:
+      - ./web:/code
 
   nginx:
     image: nginx:1.17
     container_name: ngx
     ports:
-      - "80:80"
+      - "8000:8000"
     volumes:
+      - ./web:/code
       - ./nginx:/etc/nginx/conf.d
+      - ./static:/static
     depends_on:
       - web

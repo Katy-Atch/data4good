@@ -145,6 +145,7 @@ def update_database(json_data, program_type):
     geocode_lat_long()      
 
 def populate():
+    print("Running fetchdata.py...")
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
     headers = {'X-App-Token': app_token}
     max_records = 10
@@ -161,6 +162,7 @@ def populate():
         data = response.json()
         update_database(data, entity_type)
 
+    print("Successfully completed fetchdata.py")
     return None
 
 # Loops through each item in the GEO table which needs geocoding and geocodes/saves the object

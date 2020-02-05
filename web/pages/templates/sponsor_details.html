@@ -41,37 +41,53 @@
 <br>
 <h6 class="d-inline">Address: </h6>
 <p class="d-inline">{{ sponsor.street_address1|title }}
-{% if sponsor.street_address2 != null %}
+{% if sponsor.street_address2 != None and sponsor.street_address2 != 'None' %}
 {{ sponsor.street_address2|title }}
 {% endif %} 
 {{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}</p>
 <br><br> 
 <div class="row">
-  {% if sponsor.superintendent_salutation != null or sponsor.superintendent_first_name != null or sponsor.superintendent_last_name != null %}
+  {% if sponsor.superintendent_first_name != None and sponsor.superintendent_last_name != None and sponsor.superintendent_first_name != 'None' and sponsor.superintendent_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-    <h6>Program Contact</h6>
+    <h6>Superintendent</h6>
     <p class="mb-0">
+      {% if sponsor.superintendent_salutation != None and sponsor.superintendent_salutation != 'None' %}
       {{ sponsor.superintendent_salutation}}
+      {% endif %}
       {{ sponsor.superintendent_first_name }}
       {{ sponsor.superintendent_last_name }}
     </p>
-    <p class="mb-0"><i>{{ sponsor.superintendent_title_position }}</i></p>
+    {% if sponsor.superintendent_title_position != None and sponsor.superintendent_title_position != 'None' %}
+    <p class="mb-0"><i>{{ sponsor.superintendent_title_position | title}}</i></p>
+    {% endif %}
+    {% if sponsor.superintendent_email != None and sponsor.superintendent_email != 'None' %}
     <p class="mb-0">{{ sponsor.superintendent_email }}</p>
+    {% endif %}
+    {% if sponsor.superintendent_phone != None and sponsor.superintendent_phone != 'None' %}
     <p class="mb-0">{{ sponsor.superintendent_phone }}</p>
+    {% endif %}
     
   </div>
   {% endif %}
-  {% if sponsor.childnutdir_salutation != null or sponsor.childnutdir_first_name != null or sponsor.childnutdir_last_name != null %}
+  {% if sponsor.childnutdir_first_name != None and sponsor.childnutdir_last_name != None and sponsor.childnutdir_first_name != 'None' and sponsor.childnutdir_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-    <h6>Site Supervisor</h6>
+    <h6>Child Nutrition Director</h6>
     <p class="mb-0">
+      {% if sponsor.childnutdir_salutation != None and sponsor.childnutdir_salutation != 'None' %}
       {{ sponsor.childnutdir_salutation }}
+      {% endif %}
       {{ sponsor.childnutdir_first_name }}
       {{ sponsor.childnutdir_last_name }}
     </p>
-    <p class="mb-0"><i>{{ sponsor.childnutdir_title_position }}</i></p>
+    {% if sponsor.childnutdir_title_position != None and sponsor.childnutdir_title_position != 'None' %}
+    <p class="mb-0"><i>{{ sponsor.childnutdir_title_position | title }}</i></p>
+    {% endif %}
+    {% if sponsor.childnutdir_email != None and sponsor.childnutdir_email != 'None' %}
     <p class="mb-0">{{ sponsor.childnutdir_email }}</p>
+    {% endif %}
+    {% if sponsor.childnutdir_phone != None and sponsor.childnutdir_phone != 'None' %}
     <p class="mb-0">{{ sponsor.childnutdir_phone }}</p>
+    {% endif %}
   </div>
   {% endif %}
 </div>
