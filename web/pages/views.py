@@ -75,14 +75,15 @@ def get_geos(min_lat, max_lat, min_long, max_long, entityType):
             if geo.latitude >= min_lat and geo.latitude <= max_lat \
                 and geo.longitude >= min_long and geo.longitude <= max_long:
                 if entityType == 'SITE':
-                  site = Site.objects.filter(geo_id=geo.pk).only("name")
+                  site = Site.objects.values('pk', 'name', 'geo_id').filter(geo_id=geo.pk)
                   if site:
                     geos_to_render.append(geo)
-                    geo_dict[str(geo.pk)] = serialize('json', site)
+                    # geo_dict[str(geo.pk)] = serialize('json', list(site))
+                    geo_dict[str(geo.pk)] = json.dumps(list(site))
                 elif entityType == 'SPONSOR':
-                  ce = CE.objects.filter(geo_id=geo.pk)
+                  ce = CE.objects.values('pk', 'name', 'geo_id').filter(geo_id=geo.pk)
                   if ce:
                     geos_to_render.append(geo)
-                    geo_dict[geo.pk] = ce
+                    geo_dict[str(geo.pk)] = json.dumps(list(ce))
 
     return (geos_to_render, geo_dict)

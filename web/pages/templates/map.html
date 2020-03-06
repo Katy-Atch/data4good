@@ -4,6 +4,8 @@
 {% block links %}
 {% leaflet_js %}
 {% leaflet_css %}
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 <style type="text/css">
   #main {
@@ -28,6 +30,12 @@
       create_tile_layer(map);
       get_points(map);
     });
+    map.addControl(new L.Control.Fullscreen({
+    title: {
+        'false': 'View Fullscreen',
+        'true': 'Exit Fullscreen'
+    }
+}));
     map.on('moveend', function() {
       get_points(this);
     });
@@ -87,11 +95,11 @@
       if(entity) {
         var url;
         if(entityType == "SITE") {
-          url = "/sitedetails";
+          url = "/sitedetails/";
         } else if(entityType == "SPONSOR") {
-          url = "/sponsordetails";
+          url = "/sponsordetails/";
         }
-        var popupText = "<a href='" + url + "/" + entity.pk + "'/>" + entity.fields.name + "</a>";
+        var popupText = "<a href='" + url + entity.pk + "'/>" + entity.name + "</a>";
         var siteMarker = L.circleMarker([geo_obj.fields.latitude, geo_obj.fields.longitude], {
           renderer: myRenderer,
           radius: 3.0,
@@ -105,7 +113,7 @@
           this.openPopup();
         })
         .on('dblclick', function(e){
-          window.open('{% url "site_details" entity.pk %}')
+          window.open(url + entity.pk)
         })
       }
     }
