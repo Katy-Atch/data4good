@@ -24,8 +24,8 @@
 <script type="text/javascript">
 
   function map_init(map, options){
-    $(document).ready(function () { 
-      create_tile_layer(map); 
+    $(document).ready(function () {
+      create_tile_layer(map);
       get_points(map);
     });
     map.on('moveend', function() {
@@ -55,83 +55,64 @@
       contentType: "application/json",
       data: {
         json_data : JSON.stringify({
-          'min_lat': minlat, 
-          'max_lat': maxlat, 
-          'min_long': minlong, 
+          'min_lat': minlat,
+          'max_lat': maxlat,
+          'min_long': minlong,
           'max_long': maxlong,
           'entityType': entityType
         })
       },
       success: function(data) {
-        data = JSON.parse(data.geos);
-        render_points(map, data);
+        geos = JSON.parse(data.geos);
+        sites = data.entities;
+        console.log(sites);
+
+        render_points(map, geos, sites);
       }
     })
   }
 
-  function render_points(map, geo_list) {
-    // Renderer for plotting points on canvas
+  function render_points(map, geos, sites) {
     var myRenderer = L.canvas({ padding: 0.25 });
-    var entity
-
-    for (var i = 0; i < geo_list.length; i++) {
-      var geo = geo_list[i]
-
-      if(entityType == 'SITE') {
-        $.ajax({
-          type:"GET",
-          url: "{% url 'get_site' %}",
-          contentType: "application/json",
-          data: {geo_id: geo.pk},
-          success: function(data) {
-            entity = JSON.parse(data.site);
-            geo_obj = JSON.parse(data.geo)
-            addPopup(entity[0], geo_obj[0]);
-          }
-        })
-      } else if (entityType == 'SPONSOR') {
-        $.ajax({
-          type:"GET",
-          url: "{% url 'get_sponsor' %}",
-          contentType: "application/json",
-          data: {geo_id: geo.pk},
-          success: function(data) {
-            entity = JSON.parse(data.sponsor);
-            geo_obj = JSON.parse(data.geo)
-            addPopup(entity[0], geo_obj[0]);
-          }
-        })
-      }
-
-      function addPopup(entity, geo_obj) {
-        if(entity) {
-          var url;
-          if(entityType == "SITE") {
-            url = "/sitedetails";
-          } else if(entityType == "SPONSOR") {
-            url = "/sponsordetails";
-          }
-          var popupText = "<a href='" + url + "/" + entity.pk + "'/>" + entity.fields.name + "</a>";
-          var siteMarker = L.circleMarker([geo_obj.fields.latitude, geo_obj.fields.longitude], {
-            renderer: myRenderer,
-            radius: 3.0,
-            fillOpacity: 1.0,
-            color: '#820000'
-          }).addTo(map).bindPopup(popupText)
-          .on('mouseover', function(e){
-            this.openPopup();
-          })
-          .on('click', function(e){
-            this.openPopup();
-          })
-          .on('dblclick', function(e){
-            window.open('{% url "site_details" 1 %}')
-          })
-      }
+    for(i = 0; i < geos.length; i++) {
+      geo = geos[i];
+      addPopup(geo, sites[geo.pk]);
     }
+
+    function addPopup(geo_obj, entity) {
+      entity = JSON.parse(entity);
+      console.log(entity)
+      entity = entity[0]
+
+      if(entity) {
+        var url;
+        if(entityType == "SITE") {
+          url = "/sitedetails";
+        } else if(entityType == "SPONSOR") {
+          url = "/sponsordetails";
+        }
+        var popupText = "<a href='" + url + "/" + entity.pk + "'/>" + entity.fields.name + "</a>";
+        var siteMarker = L.circleMarker([geo_obj.fields.latitude, geo_obj.fields.longitude], {
+          renderer: myRenderer,
+          radius: 3.0,
+          fillOpacity: 1.0,
+          color: '#820000'
+        }).addTo(map).bindPopup(popupText)
+        .on('mouseover', function(e){
+          this.openPopup();
+        })
+        .on('click', function(e){
+          this.openPopup();
+        })
+        .on('dblclick', function(e){
+          window.open('{% url "site_details" entity.pk %}')
+        })
+      }
     }
   }
-</script> 
+
+
+</script>
 
 </br>
 {% endblock %}
