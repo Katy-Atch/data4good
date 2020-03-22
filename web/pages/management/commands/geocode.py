@@ -1,5 +1,6 @@
 import requests
 from pages.models import Site, GEO
+from django.db.models import Count
 from random import randint
 from django.core.management.base import BaseCommand
 import sys
@@ -74,6 +75,17 @@ def create_geocode_object(street_address1, street_address2, street_city, street_
     new_geo_object.save()
     return new_geo_object.geo_id
 
+
+# Loops through each item in the GEO table which needs geocoding and geocodes/saves the object
+def geocode_lat_long():
+    for item in GEO.objects.filter(latitude=None, longitude=None):
+        geocode_address(item.geo_id, item.street_address1, item.street_address2, 
+        item.street_city, item.street_state, item.street_zip)
+
+
+def remove_geo_duplicates():
+    duplicate_lat = GEO.objects.values('latitude', 'geo_id').annotate(Count('latitude')).order_by().filter(latitude__count__gt=1)
+    duplicate_long = GEO.objects.values('longitude', 'geo_id').annotate(Count('latitude')).order_by().filter(longitude__count__gt=1)
 
 
 

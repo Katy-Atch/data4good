@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 sys.path.append("/code/pages/management/commands")
 from mapping import Mapping, GeoAttributes
 from pages.models import Site, CE, GEO
-from geocode import create_geocode_object, geocode_address
+from geocode import create_geocode_object, geocode_address, geocode_lat_long
 
 seen_ce_list = set()
 
@@ -145,7 +145,6 @@ def update_database(json_data, program_type):
     geocode_lat_long()      
 
 def populate():
-    print("Running fetchdata.py...")
     app_token = 'EHZP1uaN4Sx0pg0cxnbLdRvQU'
     headers = {'X-App-Token': app_token}
     max_records = 10
@@ -162,14 +161,7 @@ def populate():
         data = response.json()
         update_database(data, entity_type)
 
-    print("Successfully completed fetchdata.py")
     return None
-
-# Loops through each item in the GEO table which needs geocoding and geocodes/saves the object
-def geocode_lat_long():
-    for item in GEO.objects.filter(latitude=None, longitude=None):
-        geocode_address(item.geo_id, item.street_address1, item.street_address2, 
-        item.street_city, item.street_state, item.street_zip)
 
 # Checks if geocode with given location details exists. If so, return the associated geo_id. If not,
 # Create new GEO object with given location details, and return its geo_id
