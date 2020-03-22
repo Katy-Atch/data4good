@@ -1,5 +1,6 @@
 import requests
 from pages.models import Site, GEO
+from django.db.models import Count
 from random import randint
 from django.core.management.base import BaseCommand
 import sys
@@ -43,7 +44,6 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
     # Will be changed to false if an error occurs during geocoding
     valid_coordinates = True
 
-
     try:
         # Checking if there exists a lat/long for the given location
         if data['resourceSets'][0]['estimatedTotal'] > 0:
@@ -56,8 +56,10 @@ def geocode_address(geo_id, street_address1, street_address2, street_city, stree
         # field of geo object to False
         valid_coordinates = False
 
+    # In case no geo_id exists for the object being geocoded
+    if GEO.objects.filter(geo_id=geo_id).exists:
+        geo_object = GEO.objects.filter(geo_id=geo_id).first()
 
-    geo_object = GEO.objects.filter(geo_id=geo_id).first()
     geo_object.latitude = latitude
     geo_object.longitude = longitude
     geo_object.valid_coordinates = valid_coordinates
@@ -74,6 +76,17 @@ def create_geocode_object(street_address1, street_address2, street_city, street_
     new_geo_object.save()
     return new_geo_object.geo_id
 
+
+# Loops through each item in the GEO table which needs geocoding and geocodes/saves the object
+def geocode_lat_long():
+    for item in GEO.objects.filter(latitude=None, longitude=None):
+        geocode_address(item.geo_id, item.street_address1, item.street_address2, 
+        item.street_city, item.street_state, item.street_zip)
+
+
+def remove_geo_duplicates():
+    duplicate_lat = GEO.objects.values('latitude', 'geo_id').annotate(Count('latitude')).order_by().filter(latitude__count__gt=1)
+    duplicate_long = GEO.objects.values('longitude', 'geo_id').annotate(Count('latitude')).order_by().filter(longitude__count__gt=1)
 
 
 
