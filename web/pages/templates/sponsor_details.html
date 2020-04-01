@@ -4,6 +4,8 @@
 {% block links %}
 {% leaflet_js %}
 {% leaflet_css %}
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 <style type="text/css">
   #details {
@@ -43,9 +45,9 @@
 <p class="d-inline">{{ sponsor.street_address1|title }}
 {% if sponsor.street_address2 != None and sponsor.street_address2 != 'None' %}
 {{ sponsor.street_address2|title }}
-{% endif %} 
+{% endif %}
 {{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}</p>
-<br><br> 
+<br><br>
 <div class="row">
   {% if sponsor.superintendent_first_name != None and sponsor.superintendent_last_name != None and sponsor.superintendent_first_name != 'None' and sponsor.superintendent_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
@@ -61,12 +63,13 @@
     <p class="mb-0"><i>{{ sponsor.superintendent_title_position | title}}</i></p>
     {% endif %}
     {% if sponsor.superintendent_email != None and sponsor.superintendent_email != 'None' %}
-    <p class="mb-0">{{ sponsor.superintendent_email }}</p>
+    <a href="mailto:{{ sponsor.superintendent_email }}" class="mb-0">{{ sponsor.superintendent_email }}</a>
     {% endif %}
+    <br/>
     {% if sponsor.superintendent_phone != None and sponsor.superintendent_phone != 'None' %}
-    <p class="mb-0">{{ sponsor.superintendent_phone }}</p>
+    <a href="tel:{{ sponsor.superintendent_phone }}" class="mb-0">{{ sponsor.superintendent_phone }}</a>
     {% endif %}
-    
+
   </div>
   {% endif %}
   {% if sponsor.childnutdir_first_name != None and sponsor.childnutdir_last_name != None and sponsor.childnutdir_first_name != 'None' and sponsor.childnutdir_last_name != 'None' %}
@@ -83,10 +86,11 @@
     <p class="mb-0"><i>{{ sponsor.childnutdir_title_position | title }}</i></p>
     {% endif %}
     {% if sponsor.childnutdir_email != None and sponsor.childnutdir_email != 'None' %}
-    <p class="mb-0">{{ sponsor.childnutdir_email }}</p>
+    <a href="mailto:{{ sponsor.childnutdir_email }}" class="mb-0">{{ sponsor.childnutdir_email }}</a>
     {% endif %}
+    <br/>
     {% if sponsor.childnutdir_phone != None and sponsor.childnutdir_phone != 'None' %}
-    <p class="mb-0">{{ sponsor.childnutdir_phone }}</p>
+    <a href="tel:{{ sponsor.childnutdir_phone }}" class="mb-0">{{ sponsor.childnutdir_phone }}</a>
     {% endif %}
   </div>
   {% endif %}
@@ -95,32 +99,65 @@
 
 <script type="text/javascript">
     function map_init(map,options){
+      map.addControl(new L.Control.Fullscreen({
+        title: {
+            'false': 'View Fullscreen',
+            'true': 'Exit Fullscreen'
+        }
+      }));
 
       $.ajax({
-          type:"GET",
-          url: "{% url 'get_geo' %}",
-          contentType: "application/json",
-          data: {geo_id: {{ sponsor.geo_id }} },
-          success: function(data) {
-            entity = JSON.parse(data.geo);
-            addPopup(entity[0]);
-          }
-        })
-  
+        type:"GET",
+        url: "{% url 'get_geo' %}",
+        contentType: "application/json",
+        data: {geo_id: {{ sponsor.geo_id }} },
+        success: function(data) {
+          entity = JSON.parse(data.geo);
+          addPopup(entity[0]);
+        }
+      })
+
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
         id: 'mapbox.streets',
         accessToken: 'pk.eyJ1Ijoia2F0eWF0Y2giLCJhIjoiY2pzbzJiMHFuMGk4YjQ5cnJ4a2NqajdkMSJ9.BklRaDWgtluGgXiAb6YsmA'
-    }).addTo(map);
+    }).addTo(map)
 
       function addPopup(entity) {
-        map.setView([entity.fields.latitude, entity.fields.longitude], 14);
+        lat = entity.fields.latitude
+        long = entity.fields.longitude
+        map.setView([lat, long], 14);
 
-        L.marker([entity.fields.latitude, entity.fields.longitude]).addTo(map)
+        let url = "{{ sponsor.name|title }}<br>{{ sponsor.street_address1|title }}<br>{% if sponsor.street_address2 != 'None' %}{{ sponsor.street_address2|title }}<br>{% endif %}{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}"
+
+        L.marker([lat, long]).addTo(map)
         .bindPopup(
-          "{{ sponsor.name|title }}<br>{{ sponsor.street_address1|title }}<br>{% if sponsor.street_address2 != 'None' %}{{ sponsor.street_address2|title }}<br>{% endif %}{{ sponsor.street_city|title }}, {{ sponsor.street_state }} {{ sponsor.street_zip }}"
+          '<a href="#" onclick="navigate(lat,long)" >' + url + '</a>'
           ).openPopup();
+      }
+    }
+
+    function navigate(lat, lng) {
+      // If it's an iPhone..
+      if ((navigator.platform.indexOf("iPhone") !== -1) || (navigator.platform.indexOf("iPod") !== -1)) {
+        function iOSversion() {
+          if (/iP(hone|od|ad)/.test(navigator.platform)) {
+            // supports iOS 2.0 and later
+            var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+            return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)];
+          }
+        }
+        var ver = iOSversion() || [0];
+
+        var protocol = 'http://';
+        if (ver[0] >= 6) {
+          protocol = 'maps://';
+        }
+        window.location = protocol + 'maps.apple.com/maps?daddr=' + lat + ',' + lng + '&amp;ll=';
+      }
+      else {
+        window.open('http://maps.google.com?daddr=' + lat + ',' + lng + '&amp;ll=');
       }
     }
   </script>

@@ -4,6 +4,8 @@
 {% block links %}
 {% leaflet_js %}
 {% leaflet_css %}
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 <style type="text/css">
   #details {
@@ -59,9 +61,9 @@
 <p class="d-inline">{{ site.street_address1|title }}
 {% if site.street_address2 != 'None' %}
 {{ site.street_address2|title }}
-{% endif %} 
+{% endif %}
 {{ site.street_city|title }}, {{ site.street_state }} {{ site.street_zip }}</p>
-<br><br> 
+<br><br>
 <div class="row">
   {% if site.program_contact_first_name != None and site.program_contact_last_name != None and site.program_contact_first_name != 'None' and site.program_contact_last_name != 'None' %}
   <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
@@ -73,9 +75,16 @@
       {{ site.program_contact_first_name }}
       {{ site.program_contact_last_name }}
     </p>
+    {% if site.program_contact_title_position != None and site.program_contact_title_position != 'None' %}
     <p class="mb-0"><i>{{ site.program_contact_title_position }}</i></p>
-    <p class="mb-0">{{ site.program_contact_email }}</p>
-    <p class="mb-0">{{ site.program_contact_phone }}</p>
+    {% endif %}
+    {% if site.program_contact_email != None and site.program_contact_email != 'None' %}
+    <a href="mailto:{{ site.program_contact_email }}" class="mb-0">{{ site.program_contact_email }}</a>
+    {% endif %}
+    <br/>
+    {% if site.program_contact_phone != None and site.program_contact_phone != 'None' %}
+    <a href="tel:{{ site.program_contact_phone }}" class="mb-0">{{ site.program_contact_phone }}</a>
+    {% endif %}
     <br>
   </div>
   {% endif %}
@@ -93,10 +102,11 @@
     <p class="mb-0"><i>{{ site.site_supervisor_title_position }}</i></p>
     {% endif %}
     {% if site.site_supervisor_email != None and site.site_supervisor_email != 'None' %}
-    <p class="mb-0">{{ site.site_supervisor_email }}</p>
+    <a href="mailto:{{ site.site_supervisor_email }}" class="mb-0">{{ site.site_supervisor_email }}</a>
     {% endif %}
+    <br/>
     {% if site.site_supervisor_phone != None and site.site_supervisor_phone != 'None' %}
-    <p class="mb-0">{{ site.site_supervisor_phone }}</p>
+    <a href="tel:{{ site.site_supervisor_phone }}" class="mb-0">{{ site.site_supervisor_phone }}</a>
     {% endif %}
     <br>
   </div>
@@ -115,10 +125,11 @@
     <p class="mb-0"><i>{{ site.primary_auth_rep_title_position }}</i></p>
     {% endif %}
     {% if site.primary_auth_rep_email != None and site.primary_auth_rep_email != 'None' %}
-    <p class="mb-0">{{ site.primary_auth_rep_email }}</p>
+    <a href="mailto:{{ site.primary_auth_rep_email }}" class="mb-0">{{ site.primary_auth_rep_email }}</a>
     {% endif %}
+    <br/>
     {% if site.primary_auth_rep_phone != None and site.primary_auth_rep_phone != 'None' %}
-    <p class="mb-0">{{ site.primary_auth_rep_phone }}</p>
+    <a href="tel:{{ site.primary_auth_rep_phone }}" class="mb-0">{{ site.primary_auth_rep_phone }}</a>
     {% endif %}
     <br>
   </div>
@@ -128,6 +139,12 @@
 
 <script type="text/javascript">
     function map_init(map,options){
+      map.addControl(new L.Control.Fullscreen({
+        title: {
+            'false': 'View Fullscreen',
+            'true': 'Exit Fullscreen'
+        }
+      }));
 
       $.ajax({
           type:"GET",
@@ -139,7 +156,7 @@
             addPopup(entity[0]);
           }
         })
-  
+
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -148,15 +165,40 @@
     }).addTo(map);
 
       function addPopup(entity) {
-        map.setView([entity.fields.latitude, entity.fields.longitude], 14);
-  
-        L.marker([entity.fields.latitude, entity.fields.longitude]).addTo(map)
+        lat = entity.fields.latitude
+        long = entity.fields.longitude
+        map.setView([lat, long], 14);
+
+        let url = "{{ site.name|title }}<br>{{ site.street_address1|title }}<br>{% if site.street_address2 != 'None' %}{{ site.street_address2|title }}<br>{% endif %}{{ site.street_city|title }}, {{ site.street_state }} {{ site.street_zip }}"
+
+        L.marker([lat, long]).addTo(map)
         .bindPopup(
-          "{{ site.name|title }}<br>{{ site.street_address1|title }}<br>{% if site.street_address2 != 'None' %}{{ site.street_address2|title }}<br>{% endif %}{{ site.street_city|title }}, {{ site.street_state }} {{ site.street_zip }}"
+          '<a href="#" onclick="navigate(lat,long)" >' + url + '</a>'
           ).openPopup();
         }
+    }
 
-      
+    function navigate(lat, lng) {
+      // If it's an iPhone..
+      if ((navigator.platform.indexOf("iPhone") !== -1) || (navigator.platform.indexOf("iPod") !== -1)) {
+        function iOSversion() {
+          if (/iP(hone|od|ad)/.test(navigator.platform)) {
+            // supports iOS 2.0 and later
+            var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+            return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)];
+          }
+        }
+        var ver = iOSversion() || [0];
+
+        var protocol = 'http://';
+        if (ver[0] >= 6) {
+          protocol = 'maps://';
+        }
+        window.location = protocol + 'maps.apple.com/maps?daddr=' + lat + ',' + lng + '&amp;ll=';
+      }
+      else {
+        window.open('http://maps.google.com?daddr=' + lat + ',' + lng + '&amp;ll=');
+      }
     }
   </script>
 {% endblock %}
