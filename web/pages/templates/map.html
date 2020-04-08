@@ -27,6 +27,12 @@
 
   function map_init(map, options){
     $(document).ready(function () {
+      if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(getPoint);
+      }
+      else {
+        map.setView([32.7767, -96.7970], 9)
+      }
       create_tile_layer(map);
       get_points(map);
     });
@@ -39,6 +45,10 @@
     map.on('moveend', function() {
       get_points(this);
     });
+
+    function getPoint(pos) {
+      map.setView([pos.coords.latitude, pos.coords.longitude], 9)
+    }
   }
 
   function create_tile_layer(map) {
@@ -73,7 +83,6 @@
       success: function(data) {
         geos = JSON.parse(data.geos);
         sites = data.entities;
-        console.log(sites);
 
         render_points(map, geos, sites);
       }
@@ -89,7 +98,6 @@
 
     function addPopup(geo_obj, entity) {
       entity = JSON.parse(entity);
-      console.log(entity)
       entity = entity[0]
 
       if(entity) {

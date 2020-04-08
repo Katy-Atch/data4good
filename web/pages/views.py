@@ -78,7 +78,6 @@ def get_geos(min_lat, max_lat, min_long, max_long, entityType):
                   site = Site.objects.values('pk', 'name', 'geo_id').filter(geo_id=geo.pk)
                   if site:
                     geos_to_render.append(geo)
-                    # geo_dict[str(geo.pk)] = serialize('json', list(site))
                     geo_dict[str(geo.pk)] = json.dumps(list(site))
                 elif entityType == 'SPONSOR':
                   ce = CE.objects.values('pk', 'name', 'geo_id').filter(geo_id=geo.pk)

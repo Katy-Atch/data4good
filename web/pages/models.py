@@ -31,113 +31,8 @@ class Site(models.Model):
     ce_id = models.IntegerField()
     geo_id = models.IntegerField(null=True, blank=True)
 
-    # Type of SNP org- for SSO only
-    CHARTER = 'CHARTER'
-    PRIVATE = 'PRIVATE'
-    PUBLIC = 'PUBLIC'
-    RCCI = 'RCCI'
-    OTHER = 'OTHER'
-    snp_org_choices = (
-        (CHARTER, 'Charter'),
-        (PRIVATE, 'Private'),
-        (PUBLIC, 'Public'),
-        (RCCI, 'Residential Child Care Institution'),
-        (OTHER, 'Other'),
-    )
-    type_of_snp_org = models.CharField(
-        max_length=255,
-        choices=snp_org_choices,
-        default=OTHER,
-        null=True,
-        blank=True,
-    )
-
-    # Type of SFSP org- for SFSP only
-    NSC = 'NSC'
-    PNP = 'PNP'
-    RC = 'RC'
-    SFA = 'SFA'
-    UG = 'UG'
-    OTHER = 'OTHER'
-    sfsp_org_choices = (
-        (NSC, 'Nonresidential Summer Camp'),
-        (PNP, 'Private Non Profit'),
-        (RC, 'Residential Camp'),
-        (SFA, 'School Food Authority'),
-        (UG, 'Unit of Government'),
-        (OTHER, 'Other'),
-    )
-    type_of_sfsp_org = models.CharField(
-        max_length=255,
-        choices=sfsp_org_choices,
-        default=OTHER,
-        null=True,
-        blank=True,
-    )
-
     name = models.CharField(max_length=255)
     county = models.CharField(max_length=255)
-
-    # Rural or Urban
-    RURAL = 'RURAL'
-    URBAN = 'URBAN'
-    rural_urban_choices = (
-        (RURAL, 'Rural'),
-        (URBAN, 'Urban'),
-    )
-    rural_or_urban_code = models.CharField(
-        max_length=255,
-        choices=rural_urban_choices,
-        null=True,
-        blank=True,
-    )
-
-    # Site Type- different for SSO and SFSP
-    CAMP = 'CAMP'
-    CLOSED = 'CLOSED'
-    OPEN = 'OPEN'
-    ROPEN = 'ROPEN'
-    OTHER = 'OTHER'
-    sso_site_type_choices = (
-        (CAMP, 'Camp'),
-        (CLOSED, 'Closed'),
-        (OPEN, 'Open'),
-        (ROPEN, 'Open Restricted'),
-        (OTHER, 'Other'),
-    )
-    sso_site_type = models.CharField(
-        max_length=255,
-        choices=sso_site_type_choices,
-        default=OTHER,
-        null=True,
-        blank=True,
-    )
-
-    CAMP_NON_RES = 'CAMP_NON_RES'
-    CAMP_RES = 'CAMP_RES'
-    CLOSED_ENROLLED_NEEDY = 'CLOSED_ENROLLED_NEEDY'
-    CLOSED_ENROLLED_NON_NEEDY = 'CLOSED_ENROLLED_NON_NEEDY'
-    HOMELESS = 'HOMELESS'
-    OPEN = 'OPEN'
-    ROPEN = 'ROPEN'
-    OTHER = 'OTHER'
-    sfsp_site_type_choices = (
-        (CAMP_NON_RES, 'Camp-Non-Residential'),
-        (CAMP_RES, 'Camp-Residential'),
-        (CLOSED_ENROLLED_NEEDY, 'Closed-Enrolled in Needy Area'),
-        (CLOSED_ENROLLED_NON_NEEDY, 'Closed-Enrolled in Non-Needy Area'),
-        (HOMELESS, 'Homeless'),
-        (OPEN, 'Open'),
-        (ROPEN, 'Restricted Open'),
-        (OTHER, 'Other'),
-    )
-    sfsp_site_type = models.CharField(
-        max_length=255,
-        choices=sfsp_site_type_choices,
-        default=OTHER,
-        null=True,
-        blank=True,
-    )
 
     street_address1 = models.CharField(max_length=255)
     street_address2 = models.CharField(max_length=255, null=True, blank=True)
@@ -239,9 +134,6 @@ class CE(models.Model):
         default=OTHER,
     )
 
-    county_district_code = models.CharField(max_length=255, null=True, blank=True)
-    esc = models.IntegerField()
-    tda_region = models.IntegerField()
     street_address1 = models.CharField(max_length=255)
     street_address2 = models.CharField(max_length=255, null=True, blank=True)
     street_city = models.CharField(max_length=255)
@@ -274,7 +166,7 @@ class GEO(models.Model):
     street_city = models.CharField(max_length=255)
     street_state = models.CharField(max_length=255)
     street_zip = models.CharField(max_length=255)
-    
+
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
@@ -282,11 +174,11 @@ class GEO(models.Model):
 
 class SiteAdmin(admin.ModelAdmin):
     readonly_fields = ('last_updated',)
-    list_display = ('name', 'last_updated') 
+    list_display = ('name', 'last_updated')
 
 class CEAdmin(admin.ModelAdmin):
     readonly_fields = ('last_updated',)
-    list_display = ('name', 'last_updated') 
+    list_display = ('name', 'last_updated')
 
 class GEOAdmin(admin.ModelAdmin):
     list_display = ('street_address1', 'geo_id')

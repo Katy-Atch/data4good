@@ -22,8 +22,6 @@ class Mapping:
     }
 
     sso_site_mapping = {
-        "type_of_snp_org": "typeofsnporg",
-        "sso_site_type": "sitetype",
         "street_city": "sitestreetcity",
         "street_state": "sitestreetstate",
         "street_zip": "sitestreetzipcode",
@@ -38,9 +36,6 @@ class Mapping:
     }
 
     sfsp_site_mapping = {
-        "type_of_sfsp_org": "typeofsfsporg",
-        "rural_or_urban_code": "ruralorurbancode",
-        "sfsp_site_type": "sitetype",
         "street_city": "sitestreetaddresscity",
         "street_state": "sitestreetaddressstate",
         "street_zip": "sitestreetaddresszipcode",
@@ -72,9 +67,6 @@ class Mapping:
         "name": "cename",
         "county": "cecounty",
         "type_of_agency": "typeofagency",
-        "county_district_code": "countydistrictcode",
-        "esc": "esc",
-        "tda_region": "tdaregion",
         "street_address1": "cestreetaddressline1",
         "street_address2": "cestreetaddressline2",
         "street_city": "cestreetaddresscity",
@@ -100,7 +92,7 @@ class Mapping:
 
 class GeoAttributes:
     geo_attributes = [
-        'street_address1', 
+        'street_address1',
         'street_address2',
         'street_city',
         'street_state',
@@ -110,7 +102,7 @@ class GeoAttributes:
     ]
 
     location_attributes = [
-        'street_address1', 
+        'street_address1',
         'street_address2',
         'street_city',
         'street_state',
